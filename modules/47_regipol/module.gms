@@ -12,11 +12,14 @@
 *'
 *'               The `regiCarbonPrice` realization allow to determine region specific year or budget targets for CO2 or GHG emissions.
 *'
-*' @authors Renato Rodrigues, Felix Schreyer 
+*'               The `regiCoalExit` realization enables different coal phase-out policies to be implemented in different regions.
+*'
+*' @authors Renato Rodrigues, Felix Schreyer, Stephen Bi
 
 *###################### R SECTION START (MODULETYPES) ##########################
 $Ifi "%regipol%" == "none" $include "./modules/47_regipol/none/realization.gms"
 $Ifi "%regipol%" == "regiCarbonPrice" $include "./modules/47_regipol/regiCarbonPrice/realization.gms"
+$Ifi "%regipol%" == "regiCoalExit" $include "./modules/47_regipol/regiCoalExit/realization.gms"
 *###################### R SECTION END (MODULETYPES) ############################
 
 *** EOF ./modules/47_regipol/module.gms

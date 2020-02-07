@@ -74,7 +74,8 @@ configure_cfg <- function(icfg, iscen, iscenarios, isettings) {
     # Define path where the GDXs will be taken from
     gdxlist <- c(input.gdx     = isettings[iscen, "path_gdx"],
                  input_ref.gdx = isettings[iscen, "path_gdx_ref"],
-                 input_bau.gdx = isettings[iscen, "path_gdx_bau"])
+                 input_bau.gdx = isettings[iscen, "path_gdx_bau"],
+                 input_opt.gdx = isettings[iscen, "path_gdx_opt"])
 
     # Remove potential elements that contain ".gdx" and append gdxlist
     icfg$files2export$start <- .setgdxcopy(".gdx", icfg$files2export$start, gdxlist)
