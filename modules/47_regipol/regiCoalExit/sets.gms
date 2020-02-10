@@ -12,6 +12,8 @@ SETS
 	coal_PPCA_regi(all_regi) "coalition willing to phase out coal power generation" / CAZ, EUR, LAM, MEA /  
 	coal_exp_regi(all_regi) "coalition willing to phase out coal exports" / CHA, EUR, IND, JPN, MEA, NEU, OAS /
 	coal_imp_regi(all_regi) "coalition willing to phase out coal imports" / CAZ, EUR, IND, LAM, MEA, NEU, REF, SSA, USA /
+	OECD_regi(all_regi)		"OECD regions"		/ CAZ, EUR, JPN, NEU, USA / 
+	nonOECD_regi(all_regi)	"non-OECD regions"	/ CHA, IND, LAM, MEA, OAS, REF, SSA /
 
 	coal_sup_regiPLUS(all_regi) "coalition willing to phase out coal extraction" / CAZ, EUR, JPN, LAM, MEA, NEU, USA /  !! supply plus CAZ
 	coal_dem_regiPLUS(all_regi) "coalition willing to phase out coal consumption" / CAZ, EUR, JPN, LAM, MEA, NEU, USA /  !! demand plus JPN
