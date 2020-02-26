@@ -74,7 +74,7 @@
 * 
 * Input data revision: 5.937
 * 
-* Last modification (input data): Mon Feb 10 13:42:41 2020
+* Last modification (input data): Sat Feb 15 06:45:59 2020
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -120,7 +120,7 @@ option profile = 0;
 
 
 ***---------------------    Run name    -----------------------------------------
-$setGlobal c_expname  SSP2-coalimportANDexport-Npi-Bud600
+$setGlobal c_expname  SSP2-PPCA_5pc-1e4-Npi-ccs
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
@@ -283,10 +283,10 @@ c_regi_capturescen			"region to apply ccapturescen to"
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-cm_iteration_max       = 1;     !! def = 1
+cm_iteration_max       = 300;     !! def = 1
 c_solver_try_max       = 2;     !! def = 2
 c_keep_iteration_gdxes = 0;     !! def = 0
-cm_nash_autoconverge   = 1;     !! def = 1
+cm_nash_autoconverge   = 0;     !! def = 1
 $setglobal cm_MAgPIE_coupling  off     !! def = "off"
 
 cm_emiscen        = 9;         !! def = 1
@@ -425,7 +425,7 @@ $setglobal cm_techcosts  REG       !! def = REG
 $setglobal cm_regNetNegCO2  on       !! def = on
 
 *SB* cm_coalExitRegi switches between different regionally-specific coal exit policies
-$setglobal cm_coalExitRegi  importANDexport   !! def = "none"
+$setglobal cm_coalExitRegi  PPCA_5pc-1e4-ccs   !! def = "none"
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------

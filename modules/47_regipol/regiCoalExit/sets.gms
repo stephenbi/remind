@@ -7,19 +7,28 @@
 *** SOF ./modules/47_regipol/regiCoalExit/sets.gms
 
 SETS
-	coal_sup_regi(all_regi) "coalition willing to phase out coal extraction" / EUR, JPN, LAM, MEA, NEU, USA /
+	coal_sup_regi(all_regi) "coalition willing to phase out coal extraction" / EUR, JPN, LAM, MEA, NEU /
+	coal_sup_regi_50pc(all_regi) "coalition willing to phase out coal extraction" / EUR, JPN, LAM, MEA, NEU, USA /
+	coal_sup_regi_5pc(all_regi) "coalition willing to phase out coal extraction" / EUR, JPN, LAM, MEA, NEU, USA /
 	coal_dem_regi(all_regi) "coalition willing to phase out coal consumption" / CAZ, EUR, LAM, MEA, NEU, USA / !!swing regions - USA, CAZ, SSA 
-	coal_PPCA_regi(all_regi) "coalition willing to phase out coal power generation" / CAZ, EUR, LAM, MEA /  
+	coal_PPCA_regi(all_regi) "coalition willing to phase out coal power generation" / CAZ, EUR, MEA /  
+	PPCA_regi_50prob(all_regi)  "Countries with a 50% probability of joining the PPCA Jewell et al 2019" / CAZ, EUR, LAM, MEA, USA /
+	PPCA_regi_5prob(all_regi)  "Countries with a 5% probability of joining the PPCA Jewell et al 2019" / CAZ, EUR, JPN, LAM, MEA, NEU, REF, USA /
 	coal_exp_regi(all_regi) "coalition willing to phase out coal exports" / CHA, EUR, IND, JPN, MEA, NEU, OAS /
 	coal_imp_regi(all_regi) "coalition willing to phase out coal imports" / CAZ, EUR, IND, LAM, MEA, NEU, REF, SSA, USA /
 	OECD_regi(all_regi)		"OECD regions"		/ CAZ, EUR, JPN, NEU, USA / 
 	nonOECD_regi(all_regi)	"non-OECD regions"	/ CHA, IND, LAM, MEA, OAS, REF, SSA /
 
-	coal_sup_regiPLUS(all_regi) "coalition willing to phase out coal extraction" / CAZ, EUR, JPN, LAM, MEA, NEU, USA /  !! supply plus CAZ
-	coal_dem_regiPLUS(all_regi) "coalition willing to phase out coal consumption" / CAZ, EUR, JPN, LAM, MEA, NEU, USA /  !! demand plus JPN
-	coal_PPCA_regiPLUS(all_regi) "coalition willing to phase out coal power generation" / CAZ, EUR, LAM, MEA /  !! no change
-	coal_exp_regiPLUS(all_regi) "coalition willing to phase out coal exports" / CAZ, CHA, EUR, IND, JPN, MEA, NEU, OAS, USA /  !! export plus CAZ & USA
-	coal_imp_regiPLUS(all_regi) "coalition willing to phase out coal imports" / CAZ, EUR, IND, JPN, LAM, MEA, NEU, REF, SSA, USA /  !! import plus JPN
+
+
+	coal_sup_regiPLUS(all_regi) "coalition willing to phase out coal extraction plus CAZ" / CAZ, EUR, JPN, LAM, MEA, NEU, USA /
+	coal_sup_regiPlusCHA(all_regi) "coalition willing to phase out coal extraction plus CAZ & CHA" / CAZ, CHA, EUR, JPN, LAM, MEA, NEU, USA /
+	coal_sup_regiPlusIND(all_regi) "coalition willing to phase out coal extraction plus CAZ & IND" / CAZ, EUR, JPN, IND, LAM, MEA, NEU, USA /
+	coal_dem_regiPLUS(all_regi) "coalition willing to phase out coal consumption plus JPN" / CAZ, EUR, JPN, LAM, MEA, NEU, USA /
+	coal_dem_regiPlusCHA(all_regi) "coalition willing to phase out coal consumption plus JPN & CHA" / CAZ, CHA, EUR, JPN, LAM, MEA, NEU, USA /
+	coal_dem_regiPlusIND(all_regi) "coalition willing to phase out coal consumption plus JPN & IND" / CAZ, EUR, IND, JPN, LAM, MEA, NEU, USA /
+	coal_exp_regiPLUS(all_regi) "coalition willing to phase out coal exports plus CAZ & USA" / CAZ, CHA, EUR, IND, JPN, MEA, NEU, OAS, USA /
+	coal_imp_regiPLUS(all_regi) "coalition willing to phase out coal imports plus CHA" / CAZ, CHA, EUR, IND, LAM, MEA, NEU, REF, SSA, USA /
 ;
 
 *** EOF ./modules/47_regipol/regiCoalExit/sets.gms

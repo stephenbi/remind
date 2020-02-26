@@ -17,5 +17,7 @@ Execute_Loadpoint 'input_opt',
 *p47_coalExp600(ttot,all_regi) = p47_Xport(ttot,all_regi,"pecoal");
 *p47_coalImp600(ttot,all_regi) = p47_Mport(ttot,all_regi,"pecoal");
 p47_coalPow600(t,regi,entyPe,entySe,te) = p47_coalDem600(t,regi,"pecoal","seel",te);
+
+display p47_coalExtr600, p47_coalDem600, p47_coalExp600, p47_coalImp600;
     
 *** EOF ./modules/47_regipol/regiCoalExit/datainput.gms
