@@ -6,7 +6,7 @@
 *** |  Contact: remind@pik-potsdam.de
 
 *####################### R SECTION START (PHASES) ##############################
-$Ifi "%phase%" == "declarations" $include "./modules/45_carbonprice/diffPhaseIn2LinFlex/declarations.gms"
-$Ifi "%phase%" == "datainput" $include "./modules/45_carbonprice/diffPhaseIn2LinFlex/datainput.gms"
-$Ifi "%phase%" == "postsolve" $include "./modules/45_carbonprice/diffPhaseIn2LinFlex/postsolve.gms"
+$Ifi "%phase%" == "declarations" $include "./modules/45_carbonprice/diffCurvPhaseIn2Lin/declarations.gms"
+$Ifi "%phase%" == "datainput" $include "./modules/45_carbonprice/diffCurvPhaseIn2Lin/datainput.gms"
+$Ifi "%phase%" == "postsolve" $include "./modules/45_carbonprice/diffCurvPhaseIn2Lin/postsolve.gms"
 *######################## R SECTION END (PHASES) ###############################
