@@ -12,16 +12,17 @@
 
 *##################### R SECTION START (VERSION INFO) ##########################
 * 
-* Regionscode: ccd632d33a145372d31a5bc67d5df1f0
+* Regionscode: 690d3718e151be1b450b394c1064b1c5
 * 
-* Input data revision: 5.928
+* Input data revision: 5.9385
 * 
-* Last modification (input data): Fri Oct 18 13:03:57 2019
+* Last modification (input data): Thu Feb 27 05:57:55 2020
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
-$title MOFEX
-
+*----------------------------------------------------------------------
+*** main.gms: main file. welcome to remind!
+*----------------------------------------------------------------------
 *--------------------------------------------------------------------------
 *** preliminaries:
 *--------------------------------------------------------------------------
@@ -37,14 +38,40 @@ $ondollar
 $ONeolcom
 *** remove the warnings for very small exponents (x**-60) when post-processing
 $offdigit
+*** turn profiling off (0) or on (1-3, different levels of detail)
+option profile = 0;
+
+*--------------------------------------------------------------------------
+***           basic scenario choices
+*--------------------------------------------------------------------------
+
+***------------------------------------------------------------------------------------------------
+***------------------------------------------------------------------------------------------------
+*** WARNING *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***
+***------------------------------------------------------------------------------------------------
+***                        START OF WARNING ZONE
+***------------------------------------------------------------------------------------------------
+***
+*** PLEASE DO NOT PERFORM ANY CHANGES IN THE WARNING ZONE! ALL SETTINGS WILL BE AUTOMATICALLY
+*** SET BY submit.R BASED ON THE SETTINGS OF THE CORRESPONDING CFG FILE
+*** PLEASE DO ALL SETTINGS IN THE CORRESPONDING CFG FILE (e.g. config/default.cfg)
+***
+***------------------------------------------------------------------------------------------------
+*** WARNING *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***
+***------------------------------------------------------------------------------------------------
+
 
 ***---------------------    Run name    -----------------------------------------
-$setGlobal c_expname  Base_MOFEX_SSP2
+$setGlobal c_expname  SSP2-coalSupplyExit-5pc-Npi-1e4
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
 ***------------------------------------------------------------------------------
 
+***---------------------    01_macro    -----------------------------------------
+$setGlobal macro  singleSectorGr  !! def = singleSectorGr
+***---------------------    02_welfare    ---------------------------------------
+$setGlobal welfare  utilitarian  !! def = utilitarian
 ***---------------------    04_PE_FE_parameters    ------------------------------
 $setGlobal PE_FE_parameters  iea2014  !! def = iea2014
 ***---------------------    05_initialCap    ------------------------------------
@@ -53,7 +80,7 @@ $setGlobal initialCap  on             !! def = on
 $setGlobal aerosols  exoGAINS         !! def = exoGAINS
 ***---------------------    15_climate    ---------------------------------------
 $setGlobal climate  off               !! def = off
-***---------------------    16_downscaleTemperature    ---------------------------------------
+***---------------------    16_downscaleTemperature    --------------------------
 $setGlobal downscaleTemperature  off  !! def = off
 ***---------------------    20_growth    ----------------------------------------
 $setGlobal growth  exogenous          !! def = exogenous
@@ -63,6 +90,8 @@ $setGlobal tax  on                    !! def = on
 $setGlobal subsidizeLearning  off     !! def = off
 ***---------------------    23_capitalMarket    -----------------------------
 $setGlobal capitalMarket  perfect     !! def = perfect
+***---------------------    24_trade    -----------------------------------------
+$setGlobal trade  standard     !! def = standard
 ***---------------------    26_agCosts ------------------------------------------
 $setGlobal agCosts  costs               !! def = costs
 ***---------------------    29_CES_parameters    --------------------------------
@@ -70,7 +99,7 @@ $setglobal CES_parameters  load       !! def = load
 ***---------------------    30_biomass    ---------------------------------------
 $setGlobal biomass  magpie_40 !! def = magpie_40
 ***---------------------    31_fossil    ----------------------------------------
-$setGlobal fossil  timeDepGrades        !! def = grades2poly
+$setGlobal fossil  grades2poly        !! def = grades2poly
 ***---------------------    32_power    ----------------------------------------
 $setGlobal power  IntC               !! def = IntC
 ***---------------------    33_cdr       ----------------------------------------
@@ -86,15 +115,15 @@ $setglobal stationary  off            !! def = simple
 ***---------------------    39_CCU    --------------------------------------
 $setglobal CCU  off !! def = off
 ***---------------------    40_techpol  -----------------------------------------
-$setglobal techpol  none              !! def = none
+$setglobal techpol  NPi2018              !! def = none
 ***---------------------    41_emicapregi  --------------------------------------
 $setglobal emicapregi  none           !! def = none
 ***---------------------    42_banking  -----------------------------------------
 $setglobal banking  off               !! def = off
 ***---------------------    45_carbonprice  -------------------------------------
-$setglobal carbonprice  none          !! def = none
+$setglobal carbonprice  NPi2018          !! def = none
 ***---------------------    47_regipol  -------------------------------------
-$setglobal regipol  none              !! def = none
+$setglobal regipol  regiCoalExit              !! def = none
 ***---------------------    50_damages    ---------------------------------------
 $setGlobal damages  off               !! def = off
 ***---------------------    51_internalizeDamages    ---------------------------------------
@@ -130,12 +159,13 @@ cm_CCS_chemicals     "CCS for chemicals sub-sector"
 cm_CCS_steel         "CCS for steel sub-sector"
 c_solscen             "solar option choice"
 cm_bioenergy_tax      "level of bioenergy tax in fraction of bioenergy price"
-cm_bioenergymaxscen   "bound on global pebiolc production excluding residues"
+cm_bioenergymaxscen   "choose bound on global pebiolc production excluding residues"
 cm_tradecost_bio       "choose financal tradecosts for biomass (purpose grown pebiolc)"
 cm_1stgen_phaseout    "choose if 1st generation biofuels should phase out after 2030 (vm_deltaCap=0)"
-cm_startyear          "first optimized modelling time step"
+cm_cprice_red_factor  "reduction factor for price on co2luc when calculating the revenues. Replicates the reduction applied in MAgPIE"
+cm_startyear          "first optimized modelling time step [year]"
 c_start_budget        "start of GHG budget limit"
-cm_prtpScen            "pure rate of time preference standard values"
+cm_prtpScen           "pure rate of time preference standard values"
 cm_fetaxscen          "choice of final energy tax path, subsidy path and inconvenience cost path, values other than 0 make setting module 21_tax on"
 cm_multigasscen       "scenario on GHG portfolio to be included in permit trading scheme"
 cm_permittradescen    "scenario on permit trade"
@@ -179,26 +209,31 @@ cm_damages_BurkeLike_specification      "empirical specification for Burke-like 
 cm_damages_BurkeLike_persistenceTime    " persistence time in years for Burke-like damage functions"
 cm_damages_SccHorizon               "Horizon for SCC calculation. Damages cm_damagesSccHorizon years into the future are internalized."
 cm_carbonprice_temperatureLimit "not-to-exceed temperature target in degree above pre-industrial"
-cm_frac_CCS          "tax on CCS to reflect risk of leakage, formulated as fraction of carbon price"
+cm_frac_CCS          "tax on CCS to reflect risk of leakage, formulated as fraction of ccs O&M costs"
 cm_frac_NetNegEmi    "tax on CDR to reflect risk of overshooting, formulated as fraction of carbon price"
 
 cm_DiscRateScen          "Scenario for the implicit discount rate applied to the energy efficiency capital"
 cm_noReboundEffect      "Switch for allowing a rebound effect when closing the efficiency gap (cm_DiscRateScen)"
+cm_peakBudgYr       "date of net-zero CO2 emissions for peak budget runs without overshoot"
+cm_taxCO2inc_after_peakBudgYr "annual increase of CO2 price after the Peak Budget Year in $ per tCO2"
+cm_CO2priceRegConvEndYr      "Year at which regional CO2 prices converge in module 45 realization diffPhaseIn2LinFlex"
+c_regi_nucscen				"regions to apply nucscen to"
+c_regi_capturescen			"region to apply ccapturescen to"
 ;
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-cm_iteration_max       = 1;     !! def = 1
+cm_iteration_max       = 300;     !! def = 1
 c_solver_try_max       = 2;     !! def = 2
 c_keep_iteration_gdxes = 0;     !! def = 0
-cm_nash_autoconverge   = 1;     !! def = 1
+cm_nash_autoconverge   = 0;     !! def = 1
 $setglobal cm_MAgPIE_coupling  off     !! def = "off"
 
-cm_emiscen        = 1;         !! def = 1
-$setglobal cm_rcp_scen  none   !! def = "none"
-cm_co2_tax_2020   = -1;        !! def = -1
+cm_emiscen        = 9;         !! def = 1
+$setglobal cm_rcp_scen  rcp45   !! def = "none"
+cm_co2_tax_2020   = 1;        !! def = -1
 cm_co2_tax_growth = 1.05;      !! def = 1.05
 c_macscen         = 1;         !! def = 1
 
@@ -220,18 +255,19 @@ cm_bioenergymaxscen = 0;         !! def = 0
 cm_tradecost_bio     = 2;         !! def = 2
 $setglobal cm_LU_emi_scen  SSP2   !! def = SSP2
 cm_1stgen_phaseout  = 0;         !! def = 0
+cm_cprice_red_factor  = 1;         !! def = 1
 
 $setglobal cm_POPscen  pop_SSP2  !! def = pop_SSP2
 $setglobal cm_GDPscen  gdp_SSP2  !! def = gdp_SSP2
-$setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted in core/datainput.gms based on GDPscen) 
+$setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted by start_run() based on GDPscen) 
 
 *AG* and *CB* for cm_startyear greater than 2005, you have to copy the fulldata.gdx (rename it to: input_ref.gdx) from the run you want to build your new run onto.
-cm_startyear      = 2005;      !! def = 2005 for a BAU, 2015 for policy runs
+cm_startyear      = 2015;      !! def = 2005 for a BAU, 2015 for policy runs
 c_start_budget    = 2100;      !! def = 2100
 
 cm_prtpScen         = 3;         !! def = 3
 cm_fetaxscen        = 3;         !! def = 3
-cm_multigasscen     = 2;         !! def = 2
+cm_multigasscen     = 3;         !! def = 2
 cm_permittradescen  = 1;         !! def = 1
 cm_limit_peur_scen  = 1;         !! def = 1
 $setGlobal cm_oil_scen  medOil         !! def = medOil
@@ -250,13 +286,13 @@ cm_earlyreti_rate   = 0.09;      !! def 0.09
 
 cm_so2tax_scen        = 1;         !! def =
 c_cint_scen           = 1;         !! def = 1
-cm_damage              = 0.005;     !! def = 0.005
+cm_damage             = 0.005;     !! def = 0.005
 cm_solwindenergyscen  = 1;         !! def = 1
 c_techAssumptScen     = 1;         !! def = 1
 c_ccsinjecratescen    = 1;         !! def = 1
 c_ccscapratescen      = 1;         !! def = 1
 c_export_tax_scen     = 0;         !! def = 0
-cm_iterative_target_adj  = 0;      !! def = 0
+cm_iterative_target_adj  = 3;      !! def = 0
 cm_gdximport_target      = 0;      !! def = 0
 $setglobal c_SSP_forcing_adjust  forcing_SSP2   !! def = forcing_SSP2
 $setglobal c_delayPolicy  SPA0           !! def = SPA0
@@ -268,10 +304,13 @@ c_budgetCO2FFI           = 1000;   !! def = 1000
 c_abtrdy                 = 2010;   !! def = 2010
 c_abtcst                 = 1;      !! def = 1
 c_budgetCO2              = 0;   !! def = 1300
-$setGlobal cm_regiCO2target  off     !! def = off
+$setGlobal cm_regiCO2target  NA       !! def = off
+cm_peakBudgYr                 = 2100;    !! def = 2050
+cm_taxCO2inc_after_peakBudgYr = 3;      !! def = 2
+cm_CO2priceRegConvEndYr       = 2050;   !! def = 2050
 
 cm_trdadj            = 2;    !! def = 2.0
-cm_trdcst             = 1.5;  !! def = 1.5
+cm_trdcst            = 1.5;  !! def = 1.5
 c_refcapbnd          = 0;    !! def = 0
 cm_frac_CCS          = 10;   !! def = 10
 cm_frac_NetNegEmi    = 0.5;  !! def = 0.5
@@ -282,21 +321,30 @@ cm_damages_SccHorizon                 = 100;   !! def = 100
 cm_carbonprice_temperatureLimit       = 1.8;   !! def = 1.8
 
 
-cm_DiscRateScen = 0;!! def = 0
-cm_noReboundEffect = 0;
+cm_DiscRateScen        = 0;!! def = 0
+cm_noReboundEffect     = 0;
+$setGlobal cm_EsubGrowth         low  !! def = low
+$setGlobal c_scaleEmiHistorical  on  !! def = on
+
+$setGlobal cm_EDGEtr_scen  Conservative_liquids  !! def = Conservative_liquids
+
+$setGlobal c_regi_nucscen  all !! def = all
+$setGlobal c_regi_capturescen  all !! def = all
+
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *--------------------flags------------------------------------------------------------
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
-$setGlobal cm_nash_mode  parallel   !! def = parallel
-$setGlobal cm_OILRETIRE  on        !! def = off
+$setGlobal cm_nash_mode  parallel      !! def = parallel
+$setGlobal c_EARLYRETIRE       on         !! def = on
+$setGlobal cm_OILRETIRE  off        !! def = off
 $setglobal cm_INCONV_PENALTY  on         !! def = on
 $setGlobal cm_so2_out_of_opt  on         !! def = on
 $setGlobal c_skip_output  off        !! def = off
-$setGlobal cm_MOFEX  on        !! def = off
+$setGlobal cm_MOFEX  off        !! def = off
 $setGlobal cm_conoptv  conopt3    !! def = conopt3
-$setGlobal cm_ccsfosall  off        !! def = off
+$setGlobal cm_ccsfosall  on        !! def = off
 
 $setGlobal cm_APscen  SSP2          !! def = SSP2
 $setGlobal cm_magicc_calibrateTemperature2000  uncalibrated  !! def=uncalibrated
@@ -305,11 +353,11 @@ $setGlobal cm_magicc_temperatureImpulseResponse  off           !! def = off
 
 $setGlobal cm_damage_DiceLike_specification  HowardNonCatastrophic   !! def = HowardNonCatastrophic
 
-$setglobal cm_CES_configuration  stat_off-indu_fixed_shares-buil_simple-tran_complex-POP_pop_SSP2-GDP_gdp_SSP2-Kap_perfect-Reg_ccd632d33a   !! this will be changed by start_run()
+$setglobal cm_CES_configuration  stat_off-indu_fixed_shares-buil_simple-tran_complex-POP_pop_SSP2-GDP_gdp_SSP2-Kap_perfect-Reg_690d3718e1   !! this will be changed by start_run()
 
 $setglobal c_CES_calibration_new_structure  0    !! def =  0
-$setglobal c_CES_calibration_iterations  10   !! def = 10
-$setglobal c_CES_calibration_iteration        1    !! def =  1
+$setglobal c_CES_calibration_iterations  10    !! def = 10
+$setglobal c_CES_calibration_iteration          1    !! def =  1
 $setglobal c_CES_calibration_write_prices  0    !! def =  0
 $setglobal cm_CES_calibration_default_prices  0    !! def = 0
 
@@ -317,6 +365,10 @@ $setglobal c_testOneRegi_region  EUR       !! def = EUR
 
 $setglobal cm_cooling_shares  static    !! def = static
 $setglobal cm_techcosts  REG       !! def = REG
+$setglobal cm_regNetNegCO2  on       !! def = on
+
+*SB* cm_coalExitRegi switches between different regionally-specific coal exit policies
+$setglobal cm_coalExitRegi  supply50pc-1e4   !! def = "none"
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -341,7 +393,7 @@ $setGlobal cm_Full_Integration  off     !! def = off
 *** automated checks and settings
 
 *ag* set conopt version
-option nlp = conopt4;
+option nlp = %cm_conoptv%;
 option cns = %cm_conoptv%;
 
 *--------------------------------------------------------------------------

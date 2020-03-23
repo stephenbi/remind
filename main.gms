@@ -84,7 +84,7 @@
 * 
 * Input data revision: 5.9385
 * 
-* Last modification (input data): Mon Feb 24 15:24:12 2020
+* Last modification (input data): Sat Mar 21 03:38:21 2020
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -130,7 +130,7 @@ option profile = 0;
 
 
 ***---------------------    Run name    -----------------------------------------
-$setGlobal c_expname  SSP2-PPCA_5pc-1e4-Npi-ccs
+$setGlobal c_expname  AllAndPPCA-ppcaregi5pc
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
@@ -412,7 +412,7 @@ $setGlobal cm_so2_out_of_opt  on         !! def = on
 $setGlobal c_skip_output  off        !! def = off
 $setGlobal cm_MOFEX  off        !! def = off
 $setGlobal cm_conoptv  conopt3    !! def = conopt3
-$setGlobal cm_ccsfosall  off        !! def = off
+$setGlobal cm_ccsfosall  on        !! def = off
 
 $setGlobal cm_APscen  SSP2          !! def = SSP2
 $setGlobal cm_magicc_calibrateTemperature2000  uncalibrated  !! def=uncalibrated
@@ -436,7 +436,7 @@ $setglobal cm_techcosts  REG       !! def = REG
 $setglobal cm_regNetNegCO2  on       !! def = on
 
 *SB* cm_coalExitRegi switches between different regionally-specific coal exit policies
-$setglobal cm_coalExitRegi  PPCA_5pc-1e4-ccs   !! def = "none"
+$setglobal cm_coalExitRegi  AllANDPPCA5pc   !! def = "none"
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------

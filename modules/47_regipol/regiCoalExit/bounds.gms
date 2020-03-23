@@ -6,138 +6,12 @@
 *** |  Contact: remind@pik-potsdam.de
 *** SOF ./modules/47_regipol/regiCoalExit/bounds.gms
 
-$ifthen.coalRegiPol %cm_coalExitRegi% == "supply-1e4"
-*** Supply side coal phase out (Mining moratorium) with same rules as PPCA
-* vm_fuExtr.up(t,coal_sup_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-*     OECD_regi(coal_sup_regi) AND t.val ge 2030) = 1e-5;
-* vm_fuExtr.up(t,coal_sup_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-*     nonOECD_regi(coal_sup_regi) AND t.val ge 2050) = 1e-5;
-    vm_fuExtr.up(t,coal_sup_regi,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(coal_sup_regi) AND t.val ge 2030) = 1e-4;
-    vm_fuExtr.up(t,coal_sup_regi,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(coal_sup_regi) AND t.val ge 2050) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "supply-Bud600"
-    vm_fuExtr.fx(t,regi,enty,rlf)$(coal_sup_regi(regi) AND sameas(enty,"pecoal")) = 
-        p47_coalExtr600(t,regi,enty,rlf)$(coal_sup_regi(regi) AND sameas(enty,"pecoal"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "supply50pc-1e4"
-*** Supply side coal phase out (Mining moratorium) with same rules as PPCA
-* vm_fuExtr.up(t,coal_sup_regi_50pc,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-*     OECD_regi(coal_sup_regi_50pc) AND t.val ge 2030) = 1e-5;
-* vm_fuExtr.up(t,coal_sup_regi_50pc,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-*     nonOECD_regi(coal_sup_regi_50pc) AND t.val ge 2050) = 1e-5;
-    vm_fuExtr.up(t,coal_sup_regi_50pc,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(coal_sup_regi_50pc) AND t.val ge 2030) = 1e-4;
-    vm_fuExtr.up(t,coal_sup_regi_50pc,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(coal_sup_regi_50pc) AND t.val ge 2050) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "supply50pc-Bud600"
-    vm_fuExtr.fx(t,regi,enty,rlf)$(coal_sup_regi_50pc(regi) AND sameas(enty,"pecoal")) = 
-        p47_coalExtr600(t,regi,enty,rlf)$(coal_sup_regi_50pc(regi) AND sameas(enty,"pecoal"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "demand-1e4"
-    vm_demPe.up(t,coal_dem_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(coal_dem_regi) AND t.val ge 2030) = 1e-4;
-    vm_demPe.up(t,coal_dem_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(coal_dem_regi) AND t.val ge 2050) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA-1e4"
-    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030) = 1e-4;
-    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA50pc-1e4"
-    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030) = 1e-4;
-    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA5pc-1e4"
-    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) = 1e-4;
-    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "demand-B600"
-    vm_demPe.fx(t,regi,entyPe,entySe,te)$(coal_dem_regi(regi) AND sameas(entyPe,"pecoal")) = 
-        p47_coalDem600(t,regi,entyPe,entySe,te)$(coal_dem_regi(regi) AND sameas(entyPe,"pecoal"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA-B600"
-    vm_demPe.fx(t,regi,entyPe,entySe,te)$(coal_PPCA_regi(regi) AND sameas(entyPe,"pecoal")) = 
-        p47_coalDem600(t,regi,entyPe,entySe,te)$(coal_PPCA_regi(regi) AND sameas(entyPe,"pecoal"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA50pc-B600"
-    vm_demPe.fx(t,regi,entyPe,entySe,te)$(PPCA_regi_50prob(regi) AND sameas(entyPe,"pecoal")) = 
-        p47_coalDem600(t,regi,entyPe,entySe,te)$(PPCA_regi_50prob(regi) AND sameas(entyPe,"pecoal"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA5pc-B600"
-    vm_demPe.lo(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal")) = 
-        0.95 * p47_coalDem600(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal"));
-    vm_demPe.up(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal")) = 
-        1.05 * p47_coalDem600(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal"));
-        
-* $elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA-1e5"
-*     vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030) = 1e-5;
-*     vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050) = 1e-5;
-
-* $elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA50pc-1e5"
-*     vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030) = 1e-5;
-*     vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050) = 1e-5;
-
-* $elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA5pc-1e5"
-*     vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) = 1e-5;
-*     vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050) = 1e-5;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA-1e5"
-    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-        OECD_regi(coal_PPCA_regi) AND t.val ge 2030) = 1e-5;
-    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-        nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050) = 1e-5;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_Bud600"
-    vm_demPe.fx(t,regi,entyPe,entySe,te)$(coal_PPCA_regi(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel")) =
-        p47_coalPow600(t,regi,entyPe,entySe,te)$(coal_PPCA_regi(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_50pc-Bud600"
-    vm_demPe.fx(t,regi,entyPe,entySe,te)$(PPCA_regi_50prob(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel")) =
-        p47_coalPow600(t,regi,entyPe,entySe,te)$(PPCA_regi_50prob(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_5pc-Bud600"
-    vm_demPe.fx(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel")) =
-        p47_coalPow600(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_50pc-1e4"
-    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030) = 1e-4;
-    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_5pc-1e4"
-    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) = 1e-4;
-    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_ALL-Bud600"
-    vm_demPe.fx(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel")) =
-        p47_coalPow600(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_ALL-1e4"
-    vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-        ((OECD_regi(regi) AND t.val ge 2030) OR (nonOECD_regi(regi) AND t.val ge 2050))) = 1e-4;
-
-
-
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA-1e4-ccs"
+***PPCA scenarios
+$ifthen.coalRegiPol %cm_coalExitRegi% == "PPCA-1e4-ccs"
     vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030
         AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
     vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050
         AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_Bud600-ccs"
-    vm_demPe.fx(t,regi,entyPe,entySe,te)$(coal_PPCA_regi(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel") 
-        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) =
-        p47_coalPow600(t,regi,entyPe,entySe,te)$(coal_PPCA_regi(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel")
-        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_50pc-Bud600-ccs"
-    vm_demPe.fx(t,regi,entyPe,entySe,te)$(PPCA_regi_50prob(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel")
-        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) =
-        p47_coalPow600(t,regi,entyPe,entySe,te)$(PPCA_regi_50prob(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel")
-        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_5pc-Bud600-ccs"
-    vm_demPe.fx(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel")
-        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) =
-        p47_coalPow600(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel")
-        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec"));
 
 $elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_50pc-1e4-ccs"
     vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030
@@ -151,46 +25,310 @@ $elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_5pc-1e4-ccs"
     vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050
         AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
 
-$elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_ALL-Bud600-ccs"
-    vm_demPe.fx(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") 
-        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) =
-        p47_coalPow600(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel")
-        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec"));
-
 $elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_ALL-1e4-ccs"
     vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
         ((OECD_regi(regi) AND t.val ge 2030) OR (nonOECD_regi(regi) AND t.val ge 2050))
         AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
 
 
+***Demand exit scenarios (PPCA coalitions)
+$elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA-1e4"
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050) = 1e-4;
 
+$elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA50pc-1e4"
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050) = 1e-4;
 
-
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "demand_ALL-Bud600"
-    vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal")) = 
-        1.1 * p47_coalDem600(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal"));
-    vm_demPe.lo(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal")) = 
-        0.9 * p47_coalDem600(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal"));
-
-* $elseif.coalRegiPol %cm_coalExitRegi% == "demand_ALL-1e5"
-*     vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND ((t.val ge 2030 AND OECD_regi(regi)) OR (t.val ge 2050 AND nonOECD_regi(regi)))) = 1e-5;
+$elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA5pc-1e4"
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050) = 1e-4;
 
 $elseif.coalRegiPol %cm_coalExitRegi% == "demand_ALL-1e4"
     vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND t.val ge 2030 AND OECD_regi(regi)) = 1e-4;
     vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND t.val ge 2050 AND nonOECD_regi(regi)) = 1e-4;
 
-$elseif.coalRegiPol %cm_coalExitRegi% == "demand_ALL-3e4"
-    vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND t.val ge 2030 AND OECD_regi(regi)) = 3e-4;
-    vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND t.val ge 2050 AND nonOECD_regi(regi)) = 3e-4;
 
-$elseif.coalRegiPol %cm_coalExitRegi% == "demand_ALL-4e4"
-    vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND t.val ge 2030 AND OECD_regi(regi)) = 4e-4;
-    vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND t.val ge 2050 AND nonOECD_regi(regi)) = 4e-4;
+***PPCA and complementary policies
+$elseif.coalRegiPol %cm_coalExitRegi% == "supplyANDPPCA"
+    vm_fuExtr.up(t,coal_PPCA_regi,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030) = 1e-4;
+    vm_fuExtr.up(t,coal_PPCA_regi,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
 
-$elseif.coalRegiPol %cm_coalExitRegi% == "demand_ALL-4e4"
-    vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND t.val ge 2030 AND OECD_regi(regi)) = 5e-4;
-    vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND t.val ge 2050 AND nonOECD_regi(regi)) = 5e-4;
+$elseif.coalRegiPol %cm_coalExitRegi% == "importANDPPCA"
+    vm_Mport.up(t,coal_PPCA_regi,enty)$(OECD_regi(coal_PPCA_regi) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,coal_PPCA_regi,enty)$(nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "exportANDPPCA"
+    vm_Xport.up(t,coal_PPCA_regi,enty)$(OECD_regi(coal_PPCA_regi) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Xport.up(t,coal_PPCA_regi,enty)$(nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "supplyANDPPCA5pc"
+    vm_fuExtr.up(t,PPCA_regi_5prob,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) = 1e-4;
+    vm_fuExtr.up(t,PPCA_regi_5prob,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "importANDPPCA5pc"
+    vm_Mport.up(t,PPCA_regi_5prob,enty)$(OECD_regi(PPCA_regi_5prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,PPCA_regi_5prob,enty)$(nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "exportANDPPCA5pc"
+    vm_Xport.up(t,PPCA_regi_5prob,enty)$(OECD_regi(PPCA_regi_5prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Xport.up(t,PPCA_regi_5prob,enty)$(nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "supplyANDPPCA50pc"
+    vm_fuExtr.up(t,PPCA_regi_50prob,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030) = 1e-4;
+    vm_fuExtr.up(t,PPCA_regi_50prob,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "importANDPPCA50pc"
+    vm_Mport.up(t,PPCA_regi_50prob,enty)$(OECD_regi(PPCA_regi_50prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,PPCA_regi_50prob,enty)$(nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "exportANDPPCA50pc"
+    vm_Xport.up(t,PPCA_regi_50prob,enty)$(OECD_regi(PPCA_regi_50prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Xport.up(t,PPCA_regi_50prob,enty)$(nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "tradeANDPPCA"
+    vm_Xport.up(t,coal_PPCA_regi,enty)$(OECD_regi(coal_PPCA_regi) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Xport.up(t,coal_PPCA_regi,enty)$(nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,coal_PPCA_regi,enty)$(OECD_regi(coal_PPCA_regi) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,coal_PPCA_regi,enty)$(nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "tradeANDPPCA50pc"
+    vm_Xport.up(t,PPCA_regi_50prob,enty)$(OECD_regi(PPCA_regi_50prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Xport.up(t,PPCA_regi_50prob,enty)$(nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,PPCA_regi_50prob,enty)$(OECD_regi(PPCA_regi_50prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,PPCA_regi_50prob,enty)$(nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "tradeANDPPCA5pc"
+    vm_Xport.up(t,PPCA_regi_5prob,enty)$(OECD_regi(PPCA_regi_5prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Xport.up(t,PPCA_regi_5prob,enty)$(nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,PPCA_regi_5prob,enty)$(OECD_regi(PPCA_regi_5prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,PPCA_regi_5prob,enty)$(nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "AllANDPPCA"
+    vm_fuExtr.up(t,coal_PPCA_regi,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030) = 1e-4;
+    vm_fuExtr.up(t,coal_PPCA_regi,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050) = 1e-4;
+    vm_Xport.up(t,coal_PPCA_regi,enty)$(OECD_regi(coal_PPCA_regi) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Xport.up(t,coal_PPCA_regi,enty)$(nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,coal_PPCA_regi,enty)$(OECD_regi(coal_PPCA_regi) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,coal_PPCA_regi,enty)$(nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "AllANDPPCA50pc"
+    vm_fuExtr.up(t,PPCA_regi_50prob,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030) = 1e-4;
+    vm_fuExtr.up(t,PPCA_regi_50prob,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050) = 1e-4;
+    vm_Xport.up(t,PPCA_regi_50prob,enty)$(OECD_regi(PPCA_regi_50prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Xport.up(t,PPCA_regi_50prob,enty)$(nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,PPCA_regi_50prob,enty)$(OECD_regi(PPCA_regi_50prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,PPCA_regi_50prob,enty)$(nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "AllANDPPCA5pc"
+    vm_fuExtr.up(t,PPCA_regi_5prob,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) = 1e-4;
+    vm_fuExtr.up(t,PPCA_regi_5prob,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050) = 1e-4;
+    vm_Xport.up(t,PPCA_regi_5prob,enty)$(OECD_regi(PPCA_regi_5prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Xport.up(t,PPCA_regi_5prob,enty)$(nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,PPCA_regi_5prob,enty)$(OECD_regi(PPCA_regi_5prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Mport.up(t,PPCA_regi_5prob,enty)$(nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050
+        AND not sameas(te,"igccc") AND not sameas(te,"pcc") AND not sameas(te,"pco") AND not sameas(te,"coalh2c") AND not sameas(te,"coalftcrec")) = 1e-4;
+
+
+
+***Demand exit and complementary policies
+$elseif.coalRegiPol %cm_coalExitRegi% == "supplyANDdemand"
+    vm_fuExtr.up(t,coal_PPCA_regi,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030) = 1e-4;
+    vm_fuExtr.up(t,coal_PPCA_regi,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "supplyANDdemand50pc"
+    vm_fuExtr.up(t,PPCA_regi_50prob,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030) = 1e-4;
+    vm_fuExtr.up(t,PPCA_regi_50prob,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "supplyANDdemand5pc"
+    vm_fuExtr.up(t,PPCA_regi_5prob,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) = 1e-4;
+    vm_fuExtr.up(t,PPCA_regi_5prob,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "exportANDdemand"
+    vm_Xport.up(t,coal_PPCA_regi,enty)$(OECD_regi(coal_PPCA_regi) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Xport.up(t,coal_PPCA_regi,enty)$(nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030) = 1e-4;
+    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "exportANDdemand50pc"
+    vm_Xport.up(t,PPCA_regi_50prob,enty)$(OECD_regi(PPCA_regi_50prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Xport.up(t,PPCA_regi_50prob,enty)$(nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050) = 1e-4;
+
+$elseif.coalRegiPol %cm_coalExitRegi% == "exportANDdemand5pc"
+    vm_Xport.up(t,PPCA_regi_5prob,enty)$(OECD_regi(PPCA_regi_5prob) AND t.val ge 2030 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_Xport.up(t,PPCA_regi_5prob,enty)$(nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050 AND sameas(enty,"pecoal")) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) = 1e-4;
+    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050) = 1e-4;
+
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "supply-1e4"
+*     vm_fuExtr.up(t,coal_sup_regi,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(coal_sup_regi) AND t.val ge 2030) = 1e-4;
+*     vm_fuExtr.up(t,coal_sup_regi,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(coal_sup_regi) AND t.val ge 2050) = 1e-4;
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "supply-Bud600"
+*     vm_fuExtr.fx(t,regi,enty,rlf)$(coal_sup_regi(regi) AND sameas(enty,"pecoal")) = 
+*         p47_coalExtr600(t,regi,enty,rlf)$(coal_sup_regi(regi) AND sameas(enty,"pecoal"));
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "supply50pc-1e4"
+*** Supply side coal phase out (Mining moratorium) with same rules as PPCA
+* vm_fuExtr.up(t,coal_sup_regi_50pc,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
+*     OECD_regi(coal_sup_regi_50pc) AND t.val ge 2030) = 1e-5;
+* vm_fuExtr.up(t,coal_sup_regi_50pc,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
+*     nonOECD_regi(coal_sup_regi_50pc) AND t.val ge 2050) = 1e-5;
+*     vm_fuExtr.up(t,coal_sup_regi_50pc,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(coal_sup_regi_50pc) AND t.val ge 2030) = 1e-4;
+*     vm_fuExtr.up(t,coal_sup_regi_50pc,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(coal_sup_regi_50pc) AND t.val ge 2050) = 1e-4;
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "supply50pc-Bud600"
+*     vm_fuExtr.fx(t,regi,enty,rlf)$(coal_sup_regi_50pc(regi) AND sameas(enty,"pecoal")) = 
+*         p47_coalExtr600(t,regi,enty,rlf)$(coal_sup_regi_50pc(regi) AND sameas(enty,"pecoal"));
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "supply5pc-1e4"
+*     vm_fuExtr.up(t,coal_sup_regi_5pc,enty,rlf)$(sameas(enty,"pecoal") AND OECD_regi(coal_sup_regi_5pc) AND t.val ge 2030) = 1e-4;
+*     vm_fuExtr.up(t,coal_sup_regi_5pc,enty,rlf)$(sameas(enty,"pecoal") AND nonOECD_regi(coal_sup_regi_5pc) AND t.val ge 2050) = 1e-4;
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "demand-1e4"
+*     vm_demPe.up(t,coal_dem_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(coal_dem_regi) AND t.val ge 2030) = 1e-4;
+*     vm_demPe.up(t,coal_dem_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(coal_dem_regi) AND t.val ge 2050) = 1e-4;
+
+
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "demand-B600"
+*     vm_demPe.fx(t,regi,entyPe,entySe,te)$(coal_dem_regi(regi) AND sameas(entyPe,"pecoal")) = 
+*         p47_coalDem600(t,regi,entyPe,entySe,te)$(coal_dem_regi(regi) AND sameas(entyPe,"pecoal"));
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA-B600"
+*     vm_demPe.fx(t,regi,entyPe,entySe,te)$(coal_PPCA_regi(regi) AND sameas(entyPe,"pecoal")) = 
+*         p47_coalDem600(t,regi,entyPe,entySe,te)$(coal_PPCA_regi(regi) AND sameas(entyPe,"pecoal"));
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA50pc-B600"
+*     vm_demPe.fx(t,regi,entyPe,entySe,te)$(PPCA_regi_50prob(regi) AND sameas(entyPe,"pecoal")) = 
+*         p47_coalDem600(t,regi,entyPe,entySe,te)$(PPCA_regi_50prob(regi) AND sameas(entyPe,"pecoal"));
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA5pc-B600"
+*     vm_demPe.lo(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal")) = 
+*         0.95 * p47_coalDem600(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal"));
+*     vm_demPe.up(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal")) = 
+*         1.05 * p47_coalDem600(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal"));
+        
+* $elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA-1e5"
+*     vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(coal_PPCA_regi) AND t.val ge 2030) = 1e-5;
+*     vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050) = 1e-5;
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA50pc-1e5"
+*     vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030) = 1e-5;
+*     vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050) = 1e-5;
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "demand-PPCA5pc-1e5"
+*     vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) = 1e-5;
+*     vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050) = 1e-5;
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "PPCA-1e5"
+*     vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
+*         OECD_regi(coal_PPCA_regi) AND t.val ge 2030) = 1e-5;
+*     vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
+*         nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050) = 1e-5;
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_Bud600"
+*     vm_demPe.fx(t,regi,entyPe,entySe,te)$(coal_PPCA_regi(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel")) =
+*         p47_coalPow600(t,regi,entyPe,entySe,te)$(coal_PPCA_regi(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel"));
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_50pc-Bud600"
+*     vm_demPe.fx(t,regi,entyPe,entySe,te)$(PPCA_regi_50prob(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel")) =
+*         p47_coalPow600(t,regi,entyPe,entySe,te)$(PPCA_regi_50prob(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel"));
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_5pc-Bud600"
+*     vm_demPe.fx(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel")) =
+*         p47_coalPow600(t,regi,entyPe,entySe,te)$(PPCA_regi_5prob(regi) AND sameas(entyPe,"pecoal") AND sameas(entySe,"seel"));
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_50pc-1e4"
+*     vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_50prob) AND t.val ge 2030) = 1e-4;
+*     vm_demPe.up(t,PPCA_regi_50prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_50prob) AND t.val ge 2050) = 1e-4;
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_5pc-1e4"
+*     vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) = 1e-4;
+*     vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050) = 1e-4;
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_ALL-Bud600"
+*     vm_demPe.fx(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel")) =
+*         p47_coalPow600(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel"));
+
+* $elseif.coalRegiPol %cm_coalExitRegi% == "PPCA_ALL-1e4"
+*     vm_demPe.up(t,regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
+*         ((OECD_regi(regi) AND t.val ge 2030) OR (nonOECD_regi(regi) AND t.val ge 2050))) = 1e-4;
+
+
+
+
+
+
+
 
 
 $elseif.coalRegiPol %cm_coalExitRegi% == "export"
@@ -205,62 +343,10 @@ $elseif.coalRegiPol %cm_coalExitRegi% == "import"
 * vm_Mport.fx(t,regi,enty)$(coal_imp_regi(regi) AND sameas(enty,"pecoal")) = 
 *     p47_coalImp600(t,regi,enty)$(coal_imp_regi(regi) AND sameas(enty,"pecoal"));
 
-$elseif.coalRegiPol %cm_coalExitRegi% == "supplyANDPPCA"
-    vm_fuExtr.fx(t,regi,enty,rlf)$(coal_sup_regi(regi) AND sameas(enty,"pecoal")) = 
-        p47_coalExtr600(t,regi,enty,rlf)$(coal_sup_regi(regi) AND sameas(enty,"pecoal"));
-    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-        (OECD_regi(coal_PPCA_regi) AND t.val ge 2030) OR (nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050)) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "importANDPPCA"
-    vm_Mport.fx(t,regi,enty)$(coal_imp_regi(regi) AND sameas(enty,"pecoal")) = 
-        p47_coalImp600(t,regi,enty)$(coal_imp_regi(regi) AND sameas(enty,"pecoal"));
-    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-        (OECD_regi(coal_PPCA_regi) AND t.val ge 2030) OR (nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050)) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "exportANDPPCA"
-    vm_Xport.fx(t,regi,enty)$(coal_exp_regi(regi) AND sameas(enty,"pecoal")) = 
-        p47_coalExp600(t,regi,enty)$(coal_exp_regi(regi) AND sameas(enty,"pecoal"));
-    vm_demPe.up(t,coal_PPCA_regi,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-        (OECD_regi(coal_PPCA_regi) AND t.val ge 2030) OR (nonOECD_regi(coal_PPCA_regi) AND t.val ge 2050)) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "supplyANDPPCA5pc"
-    vm_fuExtr.fx(t,regi,enty,rlf)$(coal_sup_regiPLUS(regi) AND sameas(enty,"pecoal")) = 
-        p47_coalExtr600(t,regi,enty,rlf)$(coal_sup_regiPLUS(regi) AND sameas(enty,"pecoal"));
-    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-        (OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) OR (nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050)) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "importANDPPCA5pc"
-    vm_Mport.fx(t,regi,enty)$(coal_imp_regiPLUS(regi) AND sameas(enty,"pecoal")) = 
-        p47_coalImp600(t,regi,enty)$(coal_imp_regiPLUS(regi) AND sameas(enty,"pecoal"));
-    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-        (OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) OR (nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050)) = 1e-4;
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "exportANDPPCA5pc"
-    vm_Xport.fx(t,regi,enty)$(coal_exp_regiPLUS(regi) AND sameas(enty,"pecoal")) = 
-        p47_coalExp600(t,regi,enty)$(coal_exp_regiPLUS(regi) AND sameas(enty,"pecoal"));
-    vm_demPe.up(t,PPCA_regi_5prob,entyPe,entySe,te)$(sameas(entyPe,"pecoal") AND sameas(entySe,"seel") AND 
-        (OECD_regi(PPCA_regi_5prob) AND t.val ge 2030) OR (nonOECD_regi(PPCA_regi_5prob) AND t.val ge 2050)) = 1e-4;
 
 
 
         
-
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "supplyPLUS"
-    vm_fuExtr.fx(t,regi,enty,rlf)$(coal_sup_regiPLUS(regi) AND sameas(enty,"pecoal")) = 
-        p47_coalExtr600(t,regi,enty,rlf)$(coal_sup_regiPLUS(regi) AND sameas(enty,"pecoal"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "demandPLUS"
-    vm_demPe.fx(t,regi,entyPe,entySe,te)$(coal_dem_regiPLUS(regi) AND sameas(entyPe,"pecoal")) = 
-        p47_coalDem600(t,regi,entyPe,entySe,te)$(coal_dem_regiPLUS(regi) AND sameas(entyPe,"pecoal"));
-        
-$elseif.coalRegiPol %cm_coalExitRegi% == "exportPLUS"
-    vm_Xport.fx(t,regi,entyPe)$(coal_exp_regiPLUS(regi) AND sameas(entyPe,"pecoal")) = 
-        p47_coalExp600(t,regi,entyPe)$(coal_exp_regiPLUS(regi) AND sameas(entyPe,"pecoal"));
-
-$elseif.coalRegiPol %cm_coalExitRegi% == "importPLUS"
-    vm_Mport.fx(t,regi,entyPe)$(coal_imp_regiPLUS(regi) AND sameas(entyPe,"pecoal")) = 
-        p47_coalImp600(t,regi,entyPe)$(coal_imp_regiPLUS(regi) AND sameas(entyPe,"pecoal"));
 
 $elseif.coalRegiPol %cm_coalExitRegi% == "importANDextract"
     vm_Mport.fx(t,regi,enty)$(coal_imp_regi(regi) AND sameas(enty,"pecoal")) = 
