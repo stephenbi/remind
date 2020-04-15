@@ -14,9 +14,11 @@
 *   oil, gas and coal. This enables to take into account exogenous technological
 *   change for example.
 *===========================================
-* Authors...: JH, NB, TAC
+* Authors...: JH, NB, TAC, SB
 * Wiki......: http://redmine.pik-potsdam.de/projects/remind-r/wiki/31_fossil
 * History...:
+*   - 2020-04-15 : Created moinput functions for input data handling, including region-specific constraints
+*                  previously in the GAMS code. Data aggregated to H12 regions.
 *   - 2015-12-03 : Cleaning up
 *   - 2013-10-01 : Cleaning up
 *   - 2012-05-04 : Creation
@@ -39,21 +41,34 @@ p31_costExPoly(regi,"xi2","peur") = 0;
 p31_costExPoly(regi,"xi3","peur")= ( (300/1000)* 3 ** 1.8) / ((p31_costExPoly(regi,"xi3","peur")* 14 /4.154) * 3) ** 2;
 p31_costExPoly(regi,"xi4","peur") = 0;
 
+
+***----------------------------------------------------------------------
+*** Get oil gas & coal extraction cost grade data
+***----------------------------------------------------------------------
+table f31_grades(tall,all_regi,all_LU_emi_scen,xirog,all_enty,rlf) "(Input) information about exhaustibles according to the grade structure concept. Unit: TWa"
+  /
+$ondelim
+$include "./modules/31_fossil/timeDepGrades/input/p31_grades_oil.cs4r"
+$include "./modules/31_fossil/timeDepGrades/input/p31_grades_gas.cs4r"
+$include "./modules/31_fossil/timeDepGrades/input/p31_grades_coal.cs4r"
+$offdelim
+  /             ;
+
 ***----------------------------------------------------------------------
 *** Oil
 ***----------------------------------------------------------------------
 *SSP1
 $ifthen.cm_oil_scen %cm_oil_scen% == "lowOil"
-$include "./modules/31_fossil/timeDepGrades/input/p31_grades_looil.inc"
-$include "./modules/31_fossil/timeDepGrades/input/p31_datafosdec_lo.inc"
+p31_datafosdyn(all_regi,"oil",rlf,"dec") = f31_grades(t0,all_regi,"SSP1",xirog,"oil",rlf)$(sameas(xirog,"dec"));
+p31_grades(tall,regi,xirog,"oil",rlf) = f31_grades(tall,all_regi,"SSP1",xirog,"oil",rlf)$(not sameas(xirog,"dec"));
 *SSP2
 $elseif.cm_oil_scen %cm_oil_scen% == "medOil"
-$include "./modules/31_fossil/timeDepGrades/input/p31_grades_medoil.inc"
-$include "./modules/31_fossil/timeDepGrades/input/p31_datafosdec_med.inc"
+p31_datafosdyn(all_regi,"oil",rlf,"dec") = f31_grades(t0,all_regi,"SSP2",xirog,"oil",rlf)$(sameas(xirog,"dec"));
+p31_grades(tall,regi,xirog,"oil",rlf) = f31_grades(tall,all_regi,"SSP2",xirog,"oil",rlf)$(not sameas(xirog,"dec"));
 *SSP5
 $elseif.cm_oil_scen %cm_oil_scen% == "highOil"
-$include "./modules/31_fossil/timeDepGrades/input/p31_grades_hioil.inc"
-$include "./modules/31_fossil/timeDepGrades/input/p31_datafosdec_hi.inc"
+p31_datafosdyn(all_regi,"oil",rlf,"dec") = f31_grades(t0,all_regi,"SSP5",xirog,"oil",rlf)$(sameas(xirog,"dec"));
+p31_grades(tall,regi,xirog,"oil",rlf) = f31_grades(tall,all_regi,"SSP5",xirog,"oil",rlf)$(not sameas(xirog,"dec"));
 $endif.cm_oil_scen
 * There is no specific data for cm_oil_scen in this module (use same as in 3)
 *if(cm_oil_scen eq 4,
@@ -83,14 +98,16 @@ $endif.cm_oil_scen
 *);
 *SSP1
 $ifthen.cm_gas_scen %cm_gas_scen% == "lowGas"
-$include "./modules/31_fossil/timeDepGrades/input/p31_grades_logas.inc"
+p31_datafosdyn(all_regi,"gas",rlf,"dec") = f31_grades(t0,all_regi,"SSP1",xirog,"gas",rlf)$(sameas(xirog,"dec"));
+p31_grades(tall,regi,xirog,"gas",rlf) = f31_grades(tall,all_regi,"SSP1",xirog,"gas",rlf)$(not sameas(xirog,"dec"));
 *SSP2
 $elseif.cm_gas_scen %cm_gas_scen% == "medGas"
-$include "./modules/31_fossil/timeDepGrades/input/p31_grades_medgas.inc"
-
+p31_datafosdyn(all_regi,"gas",rlf,"dec") = f31_grades(t0,all_regi,"SSP2",xirog,"gas",rlf)$(sameas(xirog,"dec"));
+p31_grades(tall,regi,xirog,"gas",rlf) = f31_grades(tall,all_regi,"SSP2",xirog,"gas",rlf)$(not sameas(xirog,"dec"));
 *SSP5
 $elseif.cm_gas_scen %cm_gas_scen% == "highGas"
-$include "./modules/31_fossil/timeDepGrades/input/p31_grades_higas.inc"
+p31_datafosdyn(all_regi,"gas",rlf,"dec") = f31_grades(t0,all_regi,"SSP5",xirog,"gas",rlf)$(sameas(xirog,"dec"));
+p31_grades(tall,regi,xirog,"gas",rlf) = f31_grades(tall,all_regi,"SSP5",xirog,"gas",rlf)$(not sameas(xirog,"dec"));
 $endif.cm_gas_scen
 
 *if(cm_gas_scen ge 4,
@@ -106,13 +123,11 @@ $endif.cm_gas_scen
 *$include "./modules/31_fossil/timeDepGrades/input/p31_grades_vlocoal.inc";
 *);
 $ifthen.cm_coal_scen %cm_coal_scen% == "lowCoal"
-$include "./modules/31_fossil/timeDepGrades/input/p31_grades_locoal.inc"
-
+p31_grades(tall,regi,xirog,"coal",rlf) = f31_grades(tall,all_regi,"SSP1",xirog,"coal",rlf);
 $elseif.cm_coal_scen %cm_coal_scen% == "medCoal"
-$include "./modules/31_fossil/timeDepGrades/input/p31_grades_medcoal.inc"
-
+p31_grades(tall,regi,xirog,"coal",rlf) = f31_grades(tall,all_regi,"SSP2",xirog,"coal",rlf);
 $elseif.cm_coal_scen %cm_coal_scen% == "highCoal"
-$include "./modules/31_fossil/timeDepGrades/input/p31_grades_hicoal.inc"
+p31_grades(tall,regi,xirog,"coal",rlf) = f31_grades(tall,all_regi,"SSP5",xirog,"coal",rlf);
 $endif.cm_coal_scen
 
 ***----------------------------------------------------------------------
@@ -127,7 +142,8 @@ p31_fosadjco_xi5xi6(regi, "xi5", "pegas")  = 0.3;
 p31_fosadjco_xi5xi6(regi, "xi6", "pegas")  = 1/1;
 
 *NB*110720 include data for constraints on maximum growth and decline of vm_fuExtr, and also the offsets
-$include "./modules/31_fossil/timeDepGrades/input/p31_datafosdyn.inc";
+*SB*04022020 Hardcoded this into REMIND instead of the FFECCM input routines
+*$include "./modules/31_fossil/timeDepGrades/input/p31_datafosdyn.inc";
 
 *RP* Define bound on total PE uranium use in Megatonnes of metal uranium (U3O8, the commodity that is traded at 40-60US$/lb).
 s31_max_disp_peur = 23;
@@ -139,8 +155,12 @@ if (cm_nucscen eq 6,
 
 p31_datafosdyn(regi,"pegas",rlf,"alph") = cm_trdadj * p31_datafosdyn(regi,"pegas",rlf,"alph");
 
-p31_extraseed(ttot,regi,enty,rlf) = 0;
 *NB* extra seed value for the US gas sector to reduce initial price in EJ/yr
-p31_extraseed("2010","USA","pegas","2") = sm_EJ_2_TWa * 2;
+*SB 04/15/2020* Moved this parameter definition to moinput
+parameter p31_extraseed(ttot,regi,enty,rlf)  "extra seed value that scales up the ramp-up potential"
+$ondelim
+$include "./modules/31_fossil/grades2poly/input/p31_extraseed.cs4r"
+$offdelim
+;
 
 *** EOF ./modules/31_fossil/timeDepGrades/datainput.gms

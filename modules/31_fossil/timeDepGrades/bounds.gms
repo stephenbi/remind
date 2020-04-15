@@ -14,9 +14,11 @@
 *   oil, gas and coal. This enables to take into account exogenous technological
 *   change for example.
 *===========================================
-* Authors...: JH, NB, TAC
+* Authors...: JH, NB, TAC, SB
 * Wiki......: http://redmine.pik-potsdam.de/projects/remind-r/wiki/31_fossil
 * History...:
+*   - 2020-04-15 : Created moinput functions for input data handling, including region-specific constraints
+*                  previously in the GAMS code. Data aggregated to H12 regions.
 *   - 2015-12-03 : Cleaning up
 *   - 2015-02-06 : Add possibility for user-defined fuel extraction in 2005 
 *                  (skip automatic allocation)
@@ -88,6 +90,21 @@ if(ord(iteration) eq 1,
       );
     );
   );
+
+*------------------------------------
+*** Bounds on decline and incline rates 
+*------------------------------------
+*Taken from WEO 2008/09 via FFECCM model (written by JH 2012)
+* Maximum decline rate for oil, gas and coal
+p31_datafosdyn(regi, "pegas",  rlf, "dec")$(p31_datafosdyn(regi, "pegas",  rlf, "dec") eq 0) = 0.15;
+p31_datafosdyn(regi, "peoil",  rlf, "dec")$(p31_datafosdyn(regi, "peoil",  rlf, "dec") eq 0) = 0.15;
+p31_datafosdyn(regi, "pecoal", rlf, "dec")$(p31_datafosdyn(regi, "pecoal", rlf, "dec") eq 0) = 0.15;
+
+* Maximum extraction rate increase of oil, gas and coal
+p31_datafosdyn(regi, "pegas",  rlf, "inc") = 0.1;
+p31_datafosdyn(regi, "peoil",  rlf, "inc") = 0.1;
+p31_datafosdyn(regi, "pecoal", rlf, "inc") = 0.1;
+
 
 *------------------------------------
 *** [Optional] MOFEX
@@ -195,49 +212,61 @@ $ENDIF.cm_OILRETIRE
 *** BP statistics, 2012 says that MEA produced 1.980321 TWa in 2005 and 1.955456 TWa in 2010, however
 *** there a linear fit with an average increase of 1.5% per year was found e.g 7% per 5-year period
 *** Low and medium resource cases
-$IFTHENi.oilscen %cm_oil_scen% == "lowOil"
-  vm_Xport.up("2010", "MEA", "peoil") = 1.4876897061*1.08794;
-  vm_Xport.up("2015", "MEA", "peoil") = 1.4876897061*1.18361;
-  vm_Xport.up("2020", "MEA", "peoil") = 1.4876897061*1.28770;
-  vm_Xport.up("2025", "MEA", "peoil") = 1.4876897061*1.40094;
-  vm_Xport.up("2030", "MEA", "peoil") = 1.4876897061*1.52414;
-  vm_Xport.up("2035", "MEA", "peoil") = 1.4876897061*1.65817;
-$ELSEIFi.oilscen %cm_oil_scen% == "medOil"
-  vm_Xport.up("2010", "MEA", "peoil") = 1.4876897061*1.08794;
-  vm_Xport.up("2015", "MEA", "peoil") = 1.4876897061*1.18361;
-  vm_Xport.up("2020", "MEA", "peoil") = 1.4876897061*1.28770;
-  vm_Xport.up("2025", "MEA", "peoil") = 1.4876897061*1.40094;
-  vm_Xport.up("2030", "MEA", "peoil") = 1.4876897061*1.52414;
-  vm_Xport.up("2035", "MEA", "peoil") = 1.4876897061*1.65817;
-$ELSEIFi.oilscen %cm_oil_scen% == "highOil"
-  vm_Xport.up("2010", "MEA", "peoil") = 1.4876897061*1.08794*1.10;
-  vm_Xport.up("2015", "MEA", "peoil") = 1.4876897061*1.18361*1.20;
-  vm_Xport.up("2020", "MEA", "peoil") = 1.4876897061*1.28770*1.25;
-  vm_Xport.up("2025", "MEA", "peoil") = 1.4876897061*1.40094*1.30;
-$ENDIF.oilscen
+
+table f31_Xport(ttot,all_regi,all_enty) "Upper bounds on exports from MEA in early timesteps [TWyr]"
+$ondelim
+$include "./modules/31_fossil/grades2poly/input/f31_Xport.cs4r"
+$offdelim
+;
+vm_Xport.up(ttot,all_regi,all_enty)$(ttot.val ge 2020 AND ttot.val le 2035 AND sameas(all_enty,"peoil")) = 
+    f31_Xport(ttot,all_regi,all_enty)$(ttot.val ge 2020 AND ttot.val le 2035 AND sameas(all_enty,"peoil") AND f31_Xport(ttot,all_regi,all_enty) ne 0)
+    ;
+
+* *SB 04/15/2020 Not needed for 2010 to 2015 anymore; other years moved to moinput
+* $IFTHENi.oilscen %cm_oil_scen% == "lowOil"
+*   vm_Xport.up("2010", "MEA", "peoil") = 1.4876897061*1.08794;
+*   vm_Xport.up("2015", "MEA", "peoil") = 1.4876897061*1.18361;
+*   vm_Xport.up("2020", "MEA", "peoil") = 1.4876897061*1.28770;
+*   vm_Xport.up("2025", "MEA", "peoil") = 1.4876897061*1.40094;
+*   vm_Xport.up("2030", "MEA", "peoil") = 1.4876897061*1.52414;
+*   vm_Xport.up("2035", "MEA", "peoil") = 1.4876897061*1.65817;
+* $ELSEIFi.oilscen %cm_oil_scen% == "medOil"
+*   vm_Xport.up("2010", "MEA", "peoil") = 1.4876897061*1.08794;
+*   vm_Xport.up("2015", "MEA", "peoil") = 1.4876897061*1.18361;
+*   vm_Xport.up("2020", "MEA", "peoil") = 1.4876897061*1.28770;
+*   vm_Xport.up("2025", "MEA", "peoil") = 1.4876897061*1.40094;
+*   vm_Xport.up("2030", "MEA", "peoil") = 1.4876897061*1.52414;
+*   vm_Xport.up("2035", "MEA", "peoil") = 1.4876897061*1.65817;
+* $ELSEIFi.oilscen %cm_oil_scen% == "highOil"
+*   vm_Xport.up("2010", "MEA", "peoil") = 1.4876897061*1.08794*1.10;
+*   vm_Xport.up("2015", "MEA", "peoil") = 1.4876897061*1.18361*1.20;
+*   vm_Xport.up("2020", "MEA", "peoil") = 1.4876897061*1.28770*1.25;
+*   vm_Xport.up("2025", "MEA", "peoil") = 1.4876897061*1.40094*1.30;
+* $ENDIF.oilscen
 
 *** High resource case (allowing a bit more of flexibility to the system)
 
 *------------------------------------
 *** Upper bound on natural gas production and trade for early periods
+*No longer necessary NB 04/07/2020
 *------------------------------------
 ***EU-27: 18.95EJ/yr is total gas consumption in EU-27, 6.7EJ/yr is the EU-27 production of gas according to BP'13
 ***Therefore, the difference is the import of gas
-vm_prodPe.up("2010","EUR","pegas") = 20.2 * sm_EJ_2_TWa;
-vm_Mport.up("2010","EUR","pegas") = (19 - 6.7) * sm_EJ_2_TWa;
+* vm_prodPe.up("2010","EUR","pegas") = 20.2 * sm_EJ_2_TWa;
+* vm_Mport.up("2010","EUR","pegas") = (19 - 6.7) * sm_EJ_2_TWa;
 
-***China: consumed 5.5EJ/yr gas in 2010 and produced 3.6EJ/yr
-vm_prodPe.up("2010","CHA","pegas") = 5.5 * sm_EJ_2_TWa;
-vm_Mport.up("2010","CHA","pegas") = (5.5 - 3.6) * sm_EJ_2_TWa;
+* ***China: consumed 5.5EJ/yr gas in 2010 and produced 3.6EJ/yr
+* vm_prodPe.up("2010","CHA","pegas") = 5.5 * sm_EJ_2_TWa;
+* vm_Mport.up("2010","CHA","pegas") = (5.5 - 3.6) * sm_EJ_2_TWa;
 
-***MEA: produced ~29EJ and consumed ~21.5EJ in 2010; The export has been between 6.4 and 8.0EJ 
-*** [TODO] (Potential problem other African countries)
-vm_prodPe.up("2010","MEA","pegas") = 21.5 * sm_EJ_2_TWa;
-vm_Xport.up("2010","MEA","pegas") = (29 - 21.5) * sm_EJ_2_TWa;
+* ***MEA: produced ~29EJ and consumed ~21.5EJ in 2010; The export has been between 6.4 and 8.0EJ 
+* *** [TODO] (Potential problem other African countries)
+* vm_prodPe.up("2010","MEA","pegas") = 21.5 * sm_EJ_2_TWa;
+* vm_Xport.up("2010","MEA","pegas") = (29 - 21.5) * sm_EJ_2_TWa;
 
-***REF: produced 22.2EJ, consumed 15.6EJ
-vm_prodPe.up("2010","REF","pegas") = 15.6 * sm_EJ_2_TWa;
-vm_Xport.up("2010","REF","pegas") = (22.2 - 15.6) * sm_EJ_2_TWa;
+* ***REF: produced 22.2EJ, consumed 15.6EJ
+* vm_prodPe.up("2010","REF","pegas") = 15.6 * sm_EJ_2_TWa;
+* vm_Xport.up("2010","REF","pegas") = (22.2 - 15.6) * sm_EJ_2_TWa;
 
 *------------------------------------
 *** Regionalised upper bound on uranium extraction

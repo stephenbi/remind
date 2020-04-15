@@ -14,7 +14,7 @@
 *   oil, gas and coal. This enables to take into account exogenous technological
 *   change for example. 
 *===========================================
-* Authors...: JH, NB, TAC
+* Authors...: JH, NB, TAC, SB
 * Wiki......: http://redmine.pik-potsdam.de/projects/remind-r/wiki/31_fossil   
 * History...:
 *   - 2015-12-03 : Cleaning up
