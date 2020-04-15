@@ -218,7 +218,7 @@ prepare <- function() {
   # ATTENTION: modifying gms files
   if(!is.null(cfg$gms$carbonprice) && (cfg$gms$carbonprice == "NDC2018")){
     source("scripts/input/prepare_NDC2018.R")
-    prepare_NDC2018(as.character(cfg$files2export$start["input_ref.gdx"]))
+    prepare_NDC2018(as.character(cfg$files2export$start["input_bau.gdx"]))
   } 
   ## the following is outcommented because by now it has to be done by hand ( currently only one gdx is handed to the next run, so it is impossible to fix to one run and use the tax from another run)
   ## Update CO2 tax information for exogenous carbon price runs with the same CO2 price as a previous run
@@ -597,6 +597,18 @@ run <- function(start_subsequent_runs = TRUE) {
   # Save start time
   timeGAMSStart <- Sys.time()
   
+  # De-compress finxing files if they have already been zipped (only valid if run is restarted)
+  if (cfg$gms$cm_startyear > 2005) {
+      if (file.exists("levs.gms.gz")) {
+        cat("Unzip fixing files\n")
+        system("gzip -d -f levs.gms.gz margs.gms.gz fixings.gms.gz")
+      } else if (file.exists("levs.gms")) {
+        cat("Found unzipped fixing files. Using them.\n")
+      } else {
+        stop("cm_startyear > 2005 but no fixing files found, neither zipped or unzipped.")
+      }
+  }
+
   # Print message
   cat("\nStarting REMIND...\n")
 
