@@ -50,7 +50,7 @@ if (s31_debug eq 1,
 
 ***--------------------------------------
 *** ADDITIONAL HIGH/LOW COSTS OIL SCENARIOS
-*SB, NB, CB 04/15/2020* These constraints should no longer be necessary due to 
+*SB, NB, CB 04/15/2020* These constraints should no longer be necessary 
 ***--------------------------------------
 * High cost oil scenario with learning (from ADVANCE WP3.1)
 
@@ -111,10 +111,12 @@ if (s31_debug eq 1,
 
 *** Decline and incline rate equation offsets from FFECCM
 * Additional factor entering the decline rate equation 
-table f31_decoffset(all_regi,all_enty,rlf)    "Decline rate equation offset"
+parameter f31_decoffset(all_regi,all_enty,rlf)    "Decline rate equation offset"
+/
 $ondelim
-$include "./modules/31_fossil/grades2poly/input/f31_decoffset.cs4r"
+$include "./modules/31_fossil/timeDepGrades/input/f31_decoffset.cs4r"
 $offdelim
+/
 ;
 p31_datafosdyn(all_regi,all_enty,rlf,"decoffset")$(not sameas(all_enty,"pecoal")) = f31_decoffset(all_regi,all_enty,rlf);
 

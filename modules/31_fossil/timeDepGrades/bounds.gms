@@ -38,6 +38,22 @@ if (s31_debug eq 1,
   display p31_fuelexIni;
 );
 
+
+*------------------------------------
+*** Bounds on decline and incline rates 
+*------------------------------------
+*Taken from WEO 2008/09 via FFECCM model (written by JH 2012)
+* Maximum decline rate for oil, gas and coal
+p31_datafosdyn(regi, "pegas",  rlf, "dec")$(p31_datafosdyn(regi, "pegas",  rlf, "dec") eq 0) = 0.15;
+p31_datafosdyn(regi, "peoil",  rlf, "dec")$(p31_datafosdyn(regi, "peoil",  rlf, "dec") eq 0) = 0.15;
+p31_datafosdyn(regi, "pecoal", rlf, "dec")$(p31_datafosdyn(regi, "pecoal", rlf, "dec") eq 0) = 0.15;
+
+* Maximum extraction rate increase of oil, gas and coal
+p31_datafosdyn(regi, "pegas",  rlf, "inc") = 0.1;
+p31_datafosdyn(regi, "peoil",  rlf, "inc") = 0.1;
+p31_datafosdyn(regi, "pecoal", rlf, "inc") = 0.1;
+
+
 *------------------------------------
 *** Upper bounds on fossil fuel extraction in 2005
 *------------------------------------
@@ -90,21 +106,6 @@ if(ord(iteration) eq 1,
       );
     );
   );
-
-*------------------------------------
-*** Bounds on decline and incline rates 
-*------------------------------------
-*Taken from WEO 2008/09 via FFECCM model (written by JH 2012)
-* Maximum decline rate for oil, gas and coal
-p31_datafosdyn(regi, "pegas",  rlf, "dec")$(p31_datafosdyn(regi, "pegas",  rlf, "dec") eq 0) = 0.15;
-p31_datafosdyn(regi, "peoil",  rlf, "dec")$(p31_datafosdyn(regi, "peoil",  rlf, "dec") eq 0) = 0.15;
-p31_datafosdyn(regi, "pecoal", rlf, "dec")$(p31_datafosdyn(regi, "pecoal", rlf, "dec") eq 0) = 0.15;
-
-* Maximum extraction rate increase of oil, gas and coal
-p31_datafosdyn(regi, "pegas",  rlf, "inc") = 0.1;
-p31_datafosdyn(regi, "peoil",  rlf, "inc") = 0.1;
-p31_datafosdyn(regi, "pecoal", rlf, "inc") = 0.1;
-
 
 *------------------------------------
 *** [Optional] MOFEX
@@ -213,14 +214,16 @@ $ENDIF.cm_OILRETIRE
 *** there a linear fit with an average increase of 1.5% per year was found e.g 7% per 5-year period
 *** Low and medium resource cases
 
-table f31_Xport(ttot,all_regi,all_enty) "Upper bounds on exports from MEA in early timesteps [TWyr]"
-$ondelim
-$include "./modules/31_fossil/grades2poly/input/f31_Xport.cs4r"
-$offdelim
-;
-vm_Xport.up(ttot,all_regi,all_enty)$(ttot.val ge 2020 AND ttot.val le 2035 AND sameas(all_enty,"peoil")) = 
-    f31_Xport(ttot,all_regi,all_enty)$(ttot.val ge 2020 AND ttot.val le 2035 AND sameas(all_enty,"peoil") AND f31_Xport(ttot,all_regi,all_enty) ne 0)
-    ;
+$ifthen.oilscen %cm_oil_scen% == "lowOil"
+vm_Xport.up(t,regi,enty)$(t.val ge 2020 AND t.val le 2035 AND sameas(enty,"peoil")) = 
+    f31_Xport(t,regi,enty,"SSP1")$(t.val ge 2020 AND t.val le 2035 AND sameas(enty,"peoil") AND f31_Xport(t,regi,enty,"SSP1") ne 0);
+$elseif.oilscen %cm_oil_scen% == "medOil"
+vm_Xport.up(t,regi,enty)$(t.val ge 2020 AND t.val le 2035 AND sameas(enty,"peoil")) = 
+    f31_Xport(t,regi,enty,"SSP2")$(t.val ge 2020 AND t.val le 2035 AND sameas(enty,"peoil") AND f31_Xport(t,regi,enty,"SSP2") ne 0);
+$elseif.oilscen %cm_oil_scen% == "highOil"
+vm_Xport.up(t,regi,enty)$(t.val ge 2020 AND t.val le 2035 AND sameas(enty,"peoil")) = 
+    f31_Xport(t,regi,enty,"SSP5")$(t.val ge 2020 AND t.val le 2035 AND sameas(enty,"peoil") AND f31_Xport(t,regi,enty,"SSP5") ne 0);
+$endif.oilscen
 
 * *SB 04/15/2020 Not needed for 2010 to 2015 anymore; other years moved to moinput
 * $IFTHENi.oilscen %cm_oil_scen% == "lowOil"

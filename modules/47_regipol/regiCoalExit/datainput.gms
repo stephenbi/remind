@@ -6,18 +6,18 @@
 *** |  Contact: remind@pik-potsdam.de
 *** SOF ./modules/47_regipol/regiCoalExit/datainput.gms
 
-Execute_Loadpoint 'input_opt',
-    p47_coalExtr600 = vm_fuExtr.l,
-    p47_coalDem600 = vm_demPe.l,
-    p47_coalExp600 = vm_Xport.l,
-    p47_coalImp600 = vm_Mport.l;
+* Execute_Loadpoint 'input_opt',
+*     p47_coalExtr600 = vm_fuExtr.l,
+*     p47_coalDem600 = vm_demPe.l,
+*     p47_coalExp600 = vm_Xport.l,
+*     p47_coalImp600 = vm_Mport.l;
 
 *p47_coalExtr600(ttot,all_regi) = p47_fuExtr(ttot,all_regi,"pecoal",rlf);
 *p47_coalDem600(ttot,all_regi) = p47_demPe(ttot,all_regi,"pecoal",all_enty,all_te);
 *p47_coalExp600(ttot,all_regi) = p47_Xport(ttot,all_regi,"pecoal");
 *p47_coalImp600(ttot,all_regi) = p47_Mport(ttot,all_regi,"pecoal");
-p47_coalPow600(t,regi,entyPe,entySe,te) = p47_coalDem600(t,regi,"pecoal","seel",te);
+* p47_coalPow600(t,regi,entyPe,entySe,te) = p47_coalDem600(t,regi,"pecoal","seel",te);
 
-display p47_coalExtr600, p47_coalDem600, p47_coalExp600, p47_coalImp600;
+* display p47_coalExtr600, p47_coalDem600, p47_coalExp600, p47_coalImp600;
     
 *** EOF ./modules/47_regipol/regiCoalExit/datainput.gms
