@@ -813,6 +813,32 @@ q_PE_histCap(t,regi,entyPe,entySe)$(p_PE_histCap(t,regi,entyPe,entySe))..
     =g=
     0.9 * p_PE_histCap(t,regi,entyPe,entySe)
 ;
- 
+
+
+***---------------------------------------------------------------------------
+*' Share of green hydrogen in all hydrogen.
+***---------------------------------------------------------------------------
+q_shGreenH2(t,regi)..
+    sum(se2se("seel","seh2",te), vm_prodSe(t,regi,"seel","seh2",te))
+    =e=
+    (
+	sum(pe2se(entyPe,"seh2",te), vm_prodSe(t,regi,entyPe,"seh2",te))
+	+ sum(se2se(entySe,"seh2",te), vm_prodSe(t,regi,entySe,"seh2",te))
+    ) * v_shGreenH2(t,regi)
+;
+
+
+***---------------------------------------------------------------------------
+*' Share of biofuels in transport liquids
+***---------------------------------------------------------------------------
+q_shBioliq(t,regi)..
+    sum(se2se(entyPe,"seliqbio",te), vm_prodSe(t,regi,entyPe,"seliqbio",te))
+    =e=
+    (
+	sum(pe2se(entyPe,entySe,te)$seAgg2se("all_seliq",entySe), vm_prodSe(t,regi,entyPe,entySe,te))
+	+ sum(se2se(entySe,entySe2,te)$seAgg2se("all_seliq",entySe2), vm_prodSe(t,regi,entySe,entySe2,te))
+    ) * v_shBioliq(t,regi)
+;
+
  
 *** EOF ./core/equations.gms
