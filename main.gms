@@ -82,9 +82,9 @@
 * 
 * Regionscode: 690d3718e151be1b450b394c1064b1c5
 * 
-* Input data revision: 5.96
+* Input data revision: 5.958
 * 
-* Last modification (input data): Sat Oct 03 14:08:53 2020
+* Last modification (input data): Fri Oct 16 09:57:34 2020
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -192,23 +192,23 @@ $setglobal stationary  off            !! def = simple
 ***---------------------    39_CCU    --------------------------------------
 $setglobal CCU  off !! def = off
 ***---------------------    40_techpol  -----------------------------------------
-$setglobal techpol  NPi2018              !! def = none
+$setglobal techpol  none              !! def = none
 ***---------------------    41_emicapregi  --------------------------------------
 $setglobal emicapregi  none           !! def = none
 ***---------------------    42_banking  -----------------------------------------
 $setglobal banking  off               !! def = off
 ***---------------------    45_carbonprice  -------------------------------------
-$setglobal carbonprice  NPi2018          !! def = none
+$setglobal carbonprice  none          !! def = none
 ***---------------------    47_regipol  -------------------------------------
-$setglobal regipol  regiCoalExit              !! def = none
+$setglobal regipol  none              !! def = none
 ***---------------------    50_damages    ---------------------------------------
 $setGlobal damages  off               !! def = off
 ***---------------------    51_internalizeDamages    ---------------------------------------
 $setGlobal internalizeDamages  off               !! def = off
 ***---------------------    70_water  -------------------------------------------
-$setglobal water  off                 !! def = off
+$setglobal water  heat                 !! def = off
 ***---------------------    80_optimization    ----------------------------------
-$setGlobal optimization  nash         !! def = nash
+$setGlobal optimization  testOneRegi         !! def = nash
 ***---------------------    81_codePerformance    -------------------------------
 $setGlobal codePerformance  off       !! def = off
 
@@ -310,15 +310,15 @@ cm_FlexTaxFeedback          "switch deciding whether flexibility tax feedback on
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-cm_iteration_max       = 300;     !! def = 1
+cm_iteration_max       = 1;     !! def = 1
 c_solver_try_max       = 2;     !! def = 2
 c_keep_iteration_gdxes = 0;     !! def = 0
-cm_nash_autoconverge   = 0;     !! def = 1
+cm_nash_autoconverge   = 1;     !! def = 1
 $setglobal cm_MAgPIE_coupling  off     !! def = "off"
 
-cm_emiscen        = 9;         !! def = 1
-$setglobal cm_rcp_scen  rcp45   !! def = "none"
-cm_co2_tax_2020   = 1;        !! def = -1
+cm_emiscen        = 1;         !! def = 1
+$setglobal cm_rcp_scen  none   !! def = "none"
+cm_co2_tax_2020   = -1;        !! def = -1
 cm_co2_tax_growth = 1.05;      !! def = 1.05
 c_macscen         = 1;         !! def = 1
 
@@ -352,12 +352,12 @@ $setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted by 
 cm_GDPcovid      = 0;            !! def = 0
 
 *AG* and *CB* for cm_startyear greater than 2005, you have to copy the fulldata.gdx (rename it to: input_ref.gdx) from the run you want to build your new run onto.
-cm_startyear      = 2015;      !! def = 2005 for a BAU, 2015 for policy runs
+cm_startyear      = 2005;      !! def = 2005 for a BAU, 2015 for policy runs
 c_start_budget    = 2100;      !! def = 2100
 
 cm_prtpScen         = 3;         !! def = 3
 cm_fetaxscen        = 3;         !! def = 3
-cm_multigasscen     = 3;         !! def = 2
+cm_multigasscen     = 2;         !! def = 2
 cm_permittradescen  = 1;         !! def = 1
 cm_limit_peur_scen  = 1;         !! def = 1
 $setGlobal cm_oil_scen  medOil         !! def = medOil
@@ -382,7 +382,7 @@ c_techAssumptScen     = 1;         !! def = 1
 c_ccsinjecratescen    = 1;         !! def = 1
 c_ccscapratescen      = 1;         !! def = 1
 c_export_tax_scen     = 0;         !! def = 0
-cm_iterative_target_adj  = 3;      !! def = 0
+cm_iterative_target_adj  = 0;      !! def = 0
 cm_gdximport_target      = 0;      !! def = 0
 $setglobal c_SSP_forcing_adjust  forcing_SSP2   !! def = forcing_SSP2
 $setglobal c_delayPolicy  SPA0           !! def = SPA0
@@ -395,8 +395,8 @@ c_abtrdy                 = 2010;   !! def = 2010
 c_abtcst                 = 1;      !! def = 1
 c_budgetCO2              = 0;   !! def = 1300
 $setGlobal cm_regiCO2target  off       !! def = off
-cm_peakBudgYr                 = 2050;    !! def = 2050
-cm_taxCO2inc_after_peakBudgYr = 2;      !! def = 2
+cm_peakBudgYr                 = 2100;    !! def = 2050
+cm_taxCO2inc_after_peakBudgYr = 3;      !! def = 2
 cm_CO2priceRegConvEndYr       = 2050;   !! def = 2050
 
 cm_trdadj            = 2;    !! def = 2.0
@@ -457,14 +457,18 @@ $setglobal c_CES_calibration_iteration        1    !!  def  =  1
 $setglobal c_CES_calibration_write_prices  0    !!  def  =  0
 $setglobal cm_CES_calibration_default_prices  0.1  !!  def  =  0
 
-$setglobal c_testOneRegi_region  EUR   !! def = EUR
+$setglobal c_testOneRegi_region  LAM   !! def = EUR
 
-$setglobal cm_cooling_shares  static    !! def = static
+$setglobal cm_cooling_shares  dynamic    !! def = static
 $setglobal cm_techcosts  REG       !! def = REG
 $setglobal cm_regNetNegCO2  on       !! def = on
 
-*SB* cm_coalExitRegi switches between different regionally-specific coal exit policies
-$setglobal cm_coalExitRegi  AllANDPPCA5pc   !! def = "none"
+$setglobal cm_PPCA_pol  none !! def = power
+$setglobal cm_PPCA_size  none     !! def = current
+$setglobal cm_COVID_coal_scen  none  !! def = none
+$setglobal cm_PPCA_OECD  off    !! def = off
+$setglobal cm_PPCA_nonOECD  off    !! def = off
+
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
