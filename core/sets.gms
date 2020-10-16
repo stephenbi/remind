@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -12,10 +12,11 @@
 ***-----------------------------------------------------------------------------
 ***-----------------------------------------------------------------------------
 SETS
-c_expname "c_expname as set for use in GDX"
-/
-%c_expname%
-/
+* Save select compiler flags as sets, to make them accessible from the final gdx
+c_expname       "c_expname as set for use in GDX"       /%c_expname%/
+cm_GDPscen      "cm_GDPscen as set for use in GDX"      /%cm_GDPscen%/
+*
+
 all_POPscen     " all possible population scenarios"
 /
 pop_SDP         "SDP population scenario"
@@ -1366,6 +1367,20 @@ teRegTechCosts(all_te) "all technologies for which we differantiate tech costs"
        csp
        wind      
 /
+
+teFlex(all_te)       "all technologies which can benefit from flexibility tax"
+/
+elh2
+***dac
+/
+
+
+teFlexTax(all_te)       "all technologies to which flexibility tax/subsidy applies, flexible technologies are those in teFlex, inflexible technologies those which are not in teFlex"
+/
+elh2
+tdels
+/
+
 feForUe(all_enty)    "final energy types that are transformed into useful energys - is filled automatically from the content of fe2ue"
 ppfenFromUe(all_in)  "all ppfEn that are equivalent to UE - is filled automatically from the content of fe2ue"
 
@@ -1960,6 +1975,7 @@ alias(esty,esty2);
 alias(rlf,rlf2);
 alias(regi,regi2);
 alias(steps,steps2);
+alias(iteration,iteration2);
 
 ***-----------------------------------------------------------------------------
 ***-----------------------------------------------------------------------------

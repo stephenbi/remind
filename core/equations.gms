@@ -1,4 +1,4 @@
-*** |  (C) 2006-2019 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2020 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -54,7 +54,7 @@ q_costInvTeAdj(t,regi,teAdj)..
 ;
 
 ***---------------------------------------------------------------------------
-*' Operation and maintenance resut form costs maintenance of existing facilities according to their capacity and
+*' Operation and maintenance costs from maintenance of existing facilities according to their capacity and
 *' operation of energy transformations according to the amount of produced secondary and final energy.
 ***---------------------------------------------------------------------------
 q_costOM(t,regi)..
@@ -274,18 +274,21 @@ q_shFeCes(t,regi,entyFe,in,teEs)$feViaEs2ppfen(entyFe,in,teEs)..
 ***---------------------------------------------------------------------------
 *' Definition of capacity constraints for primary energy to secondary energy transformation:
 ***--------------------------------------------------------------------------
-q_limitCapSe(t,regi,pe2se(enty,enty2,te))..
-        vm_prodSe(t,regi,enty,enty2,te)
-        =e=
-        sum(teSe2rlf(te,rlf),
-               vm_capFac(t,regi,te) * pm_dataren(regi,"nur",rlf,te)
-               * vm_cap(t,regi,te,rlf)
-        )$(NOT teReNoBio(te))
-    +
-        sum(teRe2rlfDetail(te,rlf),
-               ( 1$teRLDCDisp(te) +  pm_dataren(regi,"nur",rlf,te)$(NOT teRLDCDisp(te)) ) * vm_capFac(t,regi,te)  
-               * vm_capDistr(t,regi,te,rlf)
-        )$(teReNoBio(te)) 
+q_limitCapSe(t,regi,pe2se(enty,enty2,te)) .. 
+  vm_prodSe(t,regi,enty,enty2,te)
+  =e=
+    sum(teSe2rlf(te,rlf),
+      pm_dataren(regi,"nur",rlf,te)
+    * vm_capFac(t,regi,te) 
+    * vm_cap(t,regi,te,rlf)
+    )$( NOT teReNoBio(te) )
+  + sum(teRe2rlfDetail(te,rlf),
+      ( 1$( teRLDCDisp(te) )
+      + pm_dataren(regi,"nur",rlf,te)$( NOT teRLDCDisp(te) )
+      ) 
+    * vm_capFac(t,regi,te)  
+    * vm_capDistr(t,regi,te,rlf)
+    )$( teReNoBio(te) )
 ;
 
 ***----------------------------------------------------------------------------
@@ -324,32 +327,35 @@ q_limitCapCCS(t,regi,ccs2te(enty,enty2,te),rlf)$teCCS2rlf(te,rlf)..
 *' after the implementation of stringent climate policies.
 *' Calculation of actual capacities (exponential and vintage growth TE):
 ***-----------------------------------------------------------------------------
-q_cap(ttot,regi,te2rlf(te,rlf))$(ttot.val ge cm_startyear)..
-         vm_cap(ttot,regi,te,rlf)
-         =e=
-***cb early retirement for some fossil technologies
-        (1 - vm_capEarlyReti(ttot,regi,te))
-        *
-
-        (sum(opTimeYr2te(te,opTimeYr)$(tsu2opTimeYr(ttot,opTimeYr) AND (opTimeYr.val gt 1) ),
-                  pm_ts(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1)) 
-                * pm_omeg(regi,opTimeYr+1,te)
-                * vm_deltaCap(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,te,rlf)
-            )
-*LB* half of the last time step ttot
-        +  pm_dt(ttot)/2 
-         * pm_omeg(regi,"2",te)
-         * vm_deltaCap(ttot,regi,te,rlf)
+q_cap(ttot,regi,te2rlf(te,rlf))$( ttot.val ge cm_startyear ) .. 
+  vm_cap(ttot,regi,te,rlf)
+  =e=
+    !! early retirement for some fossil technologies
+    (1 - vm_capEarlyReti(ttot,regi,te))
+  * ( sum(opTimeYr2te(te,opTimeYr)$(    tsu2opTimeYr(ttot,opTimeYr) 
+                                    AND opTimeYr.val gt 1           ),
+        pm_ts(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1)) 
+      * pm_omeg(regi,opTimeYr+1,te)
+      * vm_deltaCap(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,te,rlf)
+      )
+       !! half of the last time step ttot
+    +  ( pm_dt(ttot) / 2 
+       * pm_omeg(regi,"2",te)
+       * vm_deltaCap(ttot,regi,te,rlf)
+       )
 $ifthen setGlobal END2110
-             - (pm_ts(ttot)* pm_omeg(regi,"11",te)
-                  * 0.5 * vm_deltaCap(ttot,regi,te,rlf))$(ord(ttot) eq card(ttot))
+    - ( pm_ts(ttot) / 2
+      * pm_omeg(regi,"11",te)
+      * vm_deltaCap(ttot,regi,te,rlf)
+      )$ (ord(ttot) eq card(ttot) )
 $endif
-        );
+    )
+;
 
-q_capDistr(t,regi,teReNoBio(te))..
-    sum(teRe2rlfDetail(te,rlf), vm_capDistr(t,regi,te,rlf) )
-    =e=
-    vm_cap(t,regi,te,"1")
+q_capDistr(t,regi,teReNoBio(te)) .. 
+  sum(teRe2rlfDetail(te,rlf), vm_capDistr(t,regi,te,rlf))
+  =e=
+  vm_cap(t,regi,te,"1")
 ;
 
 ***---------------------------------------------------------------------------
@@ -736,6 +742,7 @@ q_eqadj(regi,ttot,teAdj(te))$(ttot.val ge max(2010, cm_startyear)) ..
          ,2)
                 /( sum(te2rlf(te,rlf),vm_deltaCap(ttot-1,regi,te,rlf)) + p_adj_seed_reg(ttot,regi) * p_adj_seed_te(ttot,regi,te)  
                    + p_adj_deltacapoffset("2010",regi,te)$(ttot.val eq 2010) + p_adj_deltacapoffset("2015",regi,te)$(ttot.val eq 2015)
+                   + p_adj_deltacapoffset("2020",regi,te)$(ttot.val eq 2020) + p_adj_deltacapoffset("2025",regi,te)$(ttot.val eq 2025)
                   );
 
 ***---------------------------------------------------------------------------
@@ -831,13 +838,11 @@ q_shGreenH2(t,regi)..
 ***---------------------------------------------------------------------------
 *' Share of biofuels in transport liquids
 ***---------------------------------------------------------------------------
-q_shBioliq(t,regi)..
-    sum(se2se(entyPe,"seliqbio",te), vm_prodSe(t,regi,entyPe,"seliqbio",te))
-    =e=
-    (
-	sum(pe2se(entyPe,entySe,te)$seAgg2se("all_seliq",entySe), vm_prodSe(t,regi,entyPe,entySe,te))
-	+ sum(se2se(entySe,entySe2,te)$seAgg2se("all_seliq",entySe2), vm_prodSe(t,regi,entySe,entySe2,te))
-    ) * v_shBioliq(t,regi)
+q_shBioTrans(t,regi)..
+  sum(se2fe(entySe,entyFeTrans,te)$seAgg2se("all_seliq",entySe), vm_prodFe(t,regi,entySe,entyFeTrans,te) )
+  * v_shBioTrans(t,regi)
+  =e=
+  sum(se2fe("seliqbio",entyFeTrans,te), vm_prodFe(t,regi,"seliqbio",entyFeTrans,te) )
 ;
 
  
