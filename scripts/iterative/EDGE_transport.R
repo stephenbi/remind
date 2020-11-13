@@ -27,10 +27,6 @@ setConfig(forcecache=T)
 
 data_folder <- "EDGE-T"
 
-mapspath <- function(fname){
-  file.path("../../modules/35_transport/edge_esm/input", fname)
-}
-
 datapath <- function(fname){
   file.path(data_folder, fname)
 }
@@ -52,7 +48,7 @@ load("config.Rdata")
 scenario <- cfg$gms$cm_GDPscen
 EDGE_scenario <- cfg$gms$cm_EDGEtr_scen
 
-EDGEscenarios <- fread("../../modules/35_transport/edge_esm/input/EDGEscenario_description.csv")[scenario_name == EDGE_scenario]
+EDGEscenarios <- fread("EDGEscenario_description.csv")[scenario_name == EDGE_scenario]
 
 inconvenience <- EDGEscenarios[options == "inconvenience", switch]
 
@@ -69,7 +65,7 @@ if (EDGE_scenario %in% c("ConvCase", "ConvCaseWise")) {
 
 
 REMIND2ISO_MAPPING <- fread(REMINDpath(cfg$regionmapping))[, .(iso = CountryCode, region = RegionCode)]
-EDGE2teESmap <- fread(mapspath("mapping_EDGE_REMIND_transport_categories.csv"))
+EDGE2teESmap <- fread("mapping_EDGE_REMIND_transport_categories.csv")
 
 
 ## input data loading
@@ -241,7 +237,7 @@ mj_km_data = vintages[["mj_km_data"]]
 
 
 ## use logit to calculate shares and intensities (on tech level)
-EDGE2CESmap <- fread(mapspath("mapping_CESnodes_EDGE.csv"))
+EDGE2CESmap <- fread("mapping_CESnodes_EDGE.csv")
 
 
 shares_int_dem <- shares_intensity_and_demand(
@@ -270,6 +266,21 @@ if (opt$reporting) {
           datapath("demandF_plot_pkm.RDS"))
   saveRDS(logit_data$annual_sales, file = datapath("annual_sales.RDS"))
   saveRDS(logit_data$pref_data, file = datapath("pref_output.RDS"))
+
+  vint <- vintages[["vintcomp_startyear"]]
+  dem <- shares_int_dem$demandF_plot_pkm
+  vint <- dem[vint, on=c("iso", "subsector_L1", "vehicle_type", "technology", "year", "sector")]
+  vint <- vint[!is.na(demand_F)][
+  , c("sector", "subsector_L3", "subsector_L2", "subsector_L1", "vint", "value") := NULL]
+  vint[, demand_F := demand_F * 1e6] # million pkm -> pkm
+
+  vint <- loadFactor[vint, on=c("year", "iso", "vehicle_type")]
+  vint[, full_demand_vkm := demand_F/loadFactor]
+  vint[, vintage_demand_vkm := demVintEachYear/loadFactor]
+  vint[, c("demand_F", "demVintEachYear", "loadFactor") := NULL]
+
+  fwrite(vint, "vintcomp.csv")
+
   quit()
 }
 
@@ -349,4 +360,3 @@ writegdx.parameter("p35_fe2es.gdx", finalInputs$intensity, "p35_fe2es",
 writegdx.parameter("p35_shFeCes.gdx", finalInputs$shFeCes, "p35_shFeCes",
                    valcol="value",
                    uelcols = c("tall", "all_regi", "SSP_scenario", "EDGE_scenario", "all_enty", "all_in", "all_teEs"))
-
