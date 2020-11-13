@@ -6,7 +6,22 @@
 *** |  Contact: remind@pik-potsdam.de
 *** SOF ./modules/47_regipol/PPCAcoalExit/postsolve.gms
 
-display vm_cap.l, vm_demSe.l;
-display p47_coalCapCOVID;
+display vm_cap.l, vm_prodSe.l, vm_emiTeDetail.l, vm_deltaCap.l, vm_emiAll.l;
+display p47_coalCapCOVID, q47_CovidCoalCap.l;
+$if %cm_PPCA_OECD% == "on" display p47_regiMaxCoalShare2030;
+
+$if %cm_PPCA_nonOECD% == "on" display p47_regiMaxCoalShare2050;
+
+
+$ifthen.policy %cm_PPCA_pol% == "power"
+$if %cm_PPCA_OECD% == "on" display q47_PPCA_OECD_power_phaseOut.l, q47_PPCA_OECD_power_phaseOut.m;
+$if %cm_PPCA_nonOECD% == "on" display q47_PPCA_nonOECD_power_phaseOut.l, q47_PPCA_nonOECD_power_phaseOut.m;
+$elseif.policy %cm_PPCA_pol% == "demand"
+* display p47_co2steel_ref, v47_co2steel_ref.l, vm_emiTeDetail.up;
+display vm_macBaseInd.l, vm_emiIndCCS.l, vm_prodFE.l, vm_emiAll.l;
+$if %cm_PPCA_OECD% == "on" display q47_PPCA_OECD_demand_exit.l, q47_PPCA_OECD_demand_exit.m;
+$if %cm_PPCA_nonOECD% == "on" display q47_PPCA_nonOECD_demand_exit.l, q47_PPCA_nonOECD_demand_exit.m;
+* display q47_PPCA_OECD_demand_exit;
+$endif.policy
 
 *** EOF ./modules/47_regipol/PPCAcoalExit/postsolve.gms

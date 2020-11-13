@@ -377,7 +377,7 @@ $Onlisting
 *** read-in of p_PE_histCap.cs3r
 table p_PE_histCap(tall,all_regi,all_enty,all_enty)     "historical installed capacity"
 $ondelim
-$include "./core/input/p_PE_histCap.cs3r"
+$include "./core/input/p_PE_histCap_PPCA.cs3r"
 $offdelim
 ;
 
@@ -386,7 +386,7 @@ $offdelim
 $Offlisting
 table   f_cf(tall,all_regi,all_te)     "installed capacity availability"
 $ondelim
-$include "./core/input/f_cf.cs3r"
+$include "./core/input/f_cf_PPCA.cs3r"
 $offdelim
 ;
 $Onlisting
@@ -400,7 +400,7 @@ pm_cf(ttot,regi,"elh2VRE") = 0.6;
 
 table p_earlyreti_adjRate(all_regi,all_te)  "extra retirement rate for technologies in countries with relatively old fleet"
 $ondelim
-$include "./core/input/p_earlyRetirementAdjFactor.cs3r"
+$include "./core/input/p_earlyRetirementAdjFactor_PPCA.cs3r"
 $offdelim
 ;
 
@@ -666,7 +666,7 @@ display p_aux_capToDistr, s_aux_cap_remaining, p_aux_capThisGrade, p_avCapFac201
 parameter p_histCapFac(tall,all_regi,all_te)     "Capacity factor (fraction of the year that a plant is running) of installed capacity in 2015"
 /
 $ondelim
-$include "./core/input/p_histCapFac.cs4r"
+$include "./core/input/p_histCapFac_PPCA.cs4r"
 $offdelim
 /
 ;

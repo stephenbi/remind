@@ -7,12 +7,25 @@
 *** SOF ./modules/47_regipol/PPCAcoalExit/sets.gms
 
 SETS
-COV_coal "COVID coal sector recovery scenario"
+coalElTeNoCCS(all_enty,all_enty,all_te)  "Mapping for coal power technologies without carbon capture"
+/
+pecoal.seel.pc
+pecoal.seel.coalchp
+pecoal.seel.igcc
+/
+
+cov_coal "COVID coal sector recovery scenario"
 /
 BAU
 Green
 Brown
 Norm
+/
+
+ppca_phase "Accession stage of the PPCA policy initiative (OECD = 2030, NonOECD = 2050)"
+/
+oecd
+nonoecd
 /
 ;
 

@@ -751,14 +751,16 @@ q_eqadj(regi,ttot,teAdj(te))$(ttot.val ge max(2010, cm_startyear)) ..
 q_limitCapEarlyReti(ttot,regi,te)$(ttot.val lt 2109 AND pm_ttot_val(ttot+1) ge max(2010, cm_startyear))..
         vm_capEarlyReti(ttot+1,regi,te)
         =g=
-        vm_capEarlyReti(ttot,regi,te);
+        vm_capEarlyReti(ttot,regi,te)
+        * 2$(sameas("%cm_PPCA_OECD%","on") OR sameas("%cm_PPCA_nonOECD%","on"))
+        ;
 
 q_smoothphaseoutCapEarlyReti(ttot,regi,te)$(ttot.val lt 2120 AND pm_ttot_val(ttot+1) ge max(2010, cm_startyear))..
         vm_capEarlyReti(ttot+1,regi,te)
         =l=
         vm_capEarlyReti(ttot,regi,te) + (pm_ttot_val(ttot+1)-pm_ttot_val(ttot)) * (cm_earlyreti_rate 
 *** more retirement possible for coal power plants in early time steps for Europe and USA, to account for relatively old fleet 
-*** and in China to account for the historically short coal plant lifespans (22 year mean from 2015-2020)
+*** and in China to account for the historically short coal plant lifespans (weighted average of 22 years from 2000-2020)
 		+ p_earlyreti_adjRate(regi,te)$(ttot.val lt 2035)
 *** more retirement possible for first generation biofuels		
 		+ 0.05$(sameas(te,"biodiesel") or sameas(te, "bioeths")));
