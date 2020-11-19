@@ -12,7 +12,7 @@ p47_co2steel_ref(ttot,all_regi)                                     "CO2 emissio
 ;
 
 variables
-v47_emiTeDetail(ttot,all_regi,all_enty,all_enty,all_te,all_enty)          "CO2 emissions from steel in reference scenario"
+v47_emiTeDetail(ttot,all_regi,all_enty,all_enty,all_te,all_enty)     "CO2 emissions from energy technologies in reference scenario"
 ;
 
 equations
@@ -20,11 +20,11 @@ equations
 * q47_ref_emi_steel(ttot,all_regi)                            "Limit CO2 emissions from steel production to reference scenario"
 $ifthen.OECD %cm_PPCA_OECD% == "on"
 q47_PPCA_OECD_demand_exit(ttot,all_regi)                    "OECD PPCA coal demand exit, represented as a maximum regional share of coal in total emissions after 2030"
-q47_PPCA_OECD_coaltr_lim(ttot,all_regi)                         "Metallurgical coal demand still permitted in OECD PPCA members until 2050"
+* q47_PPCA_OECD_coaltr_lim(ttot,all_regi)                         "Metallurgical coal demand still permitted in OECD PPCA members until 2050"
 $endif.OECD
 $ifthen.nonOECD %cm_PPCA_nonOECD% == "on"
 q47_PPCA_nonOECD_demand_exit(ttot,all_regi)                 "Non-OECD PPCA coal demand exit, represented as a maximum regional share of coal in total emissions after 2050"
-q47_PPCA_nonOECD_coaltr_lim(ttot,all_regi)                         "Metallurgical coal demand still permitted in non-OECD PPCA members until 2070"
+* q47_PPCA_nonOECD_coaltr_lim(ttot,all_regi)                         "Metallurgical coal demand still permitted in non-OECD PPCA members until 2070"
 $endif.nonOECD
 ;
 

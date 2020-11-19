@@ -82,9 +82,9 @@
 * 
 * Regionscode: 690d3718e151be1b450b394c1064b1c5
 * 
-* Input data revision: 5.961
+* Input data revision: 5.964
 * 
-* Last modification (input data): Fri Nov 13 15:59:59 2020
+* Last modification (input data): Thu Nov 19 11:08:11 2020
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -139,7 +139,7 @@ option profile = 0;
 
 
 ***---------------------    Run name    -----------------------------------------
-$setGlobal c_expname  SSP2-PPCA_power-nonOECD-3p-Green-debug
+$setGlobal c_expname  SSP2-PPCA_power-nonOECD-2p-BAU
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
@@ -432,7 +432,7 @@ cm_FlexTaxFeedback = 0; !! def 0, off
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *--------------------flags------------------------------------------------------------
 $SETGLOBAL cm_SlowConvergence  off        !! def = off
-$setGlobal cm_nash_mode  debug      !! def = parallel
+$setGlobal cm_nash_mode  parallel      !! def = parallel
 $setGlobal c_EARLYRETIRE       on         !! def = on
 $setGlobal cm_OILRETIRE  on        !! def = on
 $setglobal cm_INCONV_PENALTY  on         !! def = on
@@ -464,8 +464,8 @@ $setglobal cm_techcosts  REG       !! def = REG
 $setglobal cm_regNetNegCO2  on       !! def = on
 
 $setglobal cm_PPCA_pol  power !! def = power
-$setglobal cm_PPCA_size  3p     !! def = current
-$setglobal cm_COVID_coal_scen  Green  !! def = none
+$setglobal cm_PPCA_size  2p     !! def = current
+$setglobal cm_COVID_coal_scen  BAU  !! def = none
 $setglobal cm_PPCA_OECD  on    !! def = off
 $setglobal cm_PPCA_nonOECD  on    !! def = off
 

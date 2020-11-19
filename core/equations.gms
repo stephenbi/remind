@@ -752,7 +752,6 @@ q_limitCapEarlyReti(ttot,regi,te)$(ttot.val lt 2109 AND pm_ttot_val(ttot+1) ge m
         vm_capEarlyReti(ttot+1,regi,te)
         =g=
         vm_capEarlyReti(ttot,regi,te)
-        * 2$(sameas("%cm_PPCA_OECD%","on") OR sameas("%cm_PPCA_nonOECD%","on"))
         ;
 
 q_smoothphaseoutCapEarlyReti(ttot,regi,te)$(ttot.val lt 2120 AND pm_ttot_val(ttot+1) ge max(2010, cm_startyear))..
