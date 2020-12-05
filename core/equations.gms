@@ -762,7 +762,22 @@ q_smoothphaseoutCapEarlyReti(ttot,regi,te)$(ttot.val lt 2120 AND pm_ttot_val(tto
 *** and in China to account for the historically short coal plant lifespans (weighted average of 22 years from 2000-2020)
 		+ p_earlyreti_adjRate(regi,te)$(ttot.val lt 2035)
 *** more retirement possible for first generation biofuels		
-		+ 0.05$(sameas(te,"biodiesel") or sameas(te, "bioeths")));
+		+ 0.05$(sameas(te,"biodiesel") or sameas(te, "bioeths"))
+*** more coal plant retirement possible for OECD members who join the PPCA and must phase out coal by 2030
+$ifthen.ppca %regipol% == "PPCAcoalExit"
+$ifthen.oecd %cm_PPCA_OECD% == "on"
+$ifthen.pol %cm_PPCA_pol% == "power"
+    + (0.11 - p_earlyreti_adjRate(regi,te))$(p47_max_coal_el_share_oecd(regi) lt 0.1 AND ttot.val le 2030 AND sameas(te,"pc"))
+    + 0.11$(p47_max_coal_el_share_oecd(regi) lt 0.02 AND ttot.val le 2030 AND (sameas(te,"coalchp") OR sameas(te,"igcc")))
+$elseif.pol %cm_PPCA_pol% == "demand"
+    + (0.11 - p_earlyreti_adjRate(regi,te))$(p47_max_coal_dem_share_oecd(regi,"demand") lt 0.1 AND ttot.val le 2030 AND sameas(te,"pc"))
+    + 0.11$(p47_max_coal_dem_share_oecd(regi,"demand") lt 0.02 AND ttot.val le 2030 AND (sameas(te,"coalchp") OR sameas(te,"igcc") OR sameas(te,"pcc") OR sameas(te,"pco") OR sameas(te,"igccc") OR sameas(te,"coalhp") OR sameas(te,"coalgas") OR sameas(te,"coalftrec") OR sameas(te,"coalh2") OR sameas(te,"coalh2c")))
+    + 0.11$(p47_max_coal_dem_share_oecd(regi,"solids") lt 0.05 AND ttot.val le 2030 AND sameas(te,"coaltr"))
+$endif.pol
+$endif.oecd
+$endif.ppca
+    )
+;
 
 
 

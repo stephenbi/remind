@@ -84,7 +84,7 @@
 * 
 * Input data revision: 5.964
 * 
-* Last modification (input data): Thu Nov 19 11:08:11 2020
+* Last modification (input data): Sat Dec  5 22:52:55 2020
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -139,7 +139,7 @@ option profile = 0;
 
 
 ***---------------------    Run name    -----------------------------------------
-$setGlobal c_expname  SSP2-PPCA_power-nonOECD-2p-BAU
+$setGlobal c_expname  PPCA_demand-current-COV-Green
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
@@ -349,10 +349,10 @@ cm_cprice_red_factor  = 1;         !! def = 1
 $setglobal cm_POPscen  pop_SSP2  !! def = pop_SSP2
 $setglobal cm_GDPscen  gdp_SSP2  !! def = gdp_SSP2
 $setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted by start_run() based on GDPscen) 
-cm_GDPcovid      = 0;            !! def = 0
+cm_GDPcovid      = 1;            !! def = 0
 
 *AG* and *CB* for cm_startyear greater than 2005, you have to copy the fulldata.gdx (rename it to: input_ref.gdx) from the run you want to build your new run onto.
-cm_startyear      = 2035;      !! def = 2005 for a BAU, 2015 for policy runs
+cm_startyear      = 2025;      !! def = 2005 for a BAU, 2015 for policy runs
 c_start_budget    = 2100;      !! def = 2100
 
 cm_prtpScen         = 3;         !! def = 3
@@ -463,9 +463,9 @@ $setglobal cm_cooling_shares  dynamic    !! def = static
 $setglobal cm_techcosts  REG       !! def = REG
 $setglobal cm_regNetNegCO2  on       !! def = on
 
-$setglobal cm_PPCA_pol  power !! def = power
-$setglobal cm_PPCA_size  2p     !! def = current
-$setglobal cm_COVID_coal_scen  BAU  !! def = none
+$setglobal cm_PPCA_pol  demand !! def = power
+$setglobal cm_PPCA_size  current     !! def = current
+$setglobal cm_COVID_coal_scen  Green  !! def = none
 $setglobal cm_PPCA_OECD  on    !! def = off
 $setglobal cm_PPCA_nonOECD  on    !! def = off
 

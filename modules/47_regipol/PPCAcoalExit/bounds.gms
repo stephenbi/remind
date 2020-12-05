@@ -6,22 +6,15 @@
 *** |  Contact: remind@pik-potsdam.de
 *** SOF ./modules/47_regipol/PPCAcoalExit/bounds.gms
 
+Execute_Loadpoint 'input_ref' p47_prodCouple = pm_prodCouple;
+Execute_Loadpoint 'input_ref' p47_prodSe = vm_prodSe.l;
+Execute_Loadpoint 'input_ref' p47_prodFe = vm_prodFe.l;
+Execute_Loadpoint 'input_ref' p47_co2CCS = vm_co2CCS.l;
+
 $ifthen.policy %cm_PPCA_pol% == "demand"
-*** Read in CO2 emissions from steel production in reference scenario 
-Execute_Loadpoint 'input_ref' v47_emiTeDetail.l = vm_emiTeDetail.l;
-p47_co2steel_ref(t,regi) = v47_emiTeDetail.l(t,regi,"pecoal","sesofos","coaltr","co2");
 
-
-*** Limit CO2 emissions in demand exit policy scenario to reference case (allows PPCA members to use coal for steel production until 2070)
-vm_emiTeDetail.up(t,regi,"pecoal","sesofos","coaltr","co2")$(sameas("%cm_PPCA_OECD%","on") AND t.val ge 2030)
-    = 
-    p47_co2steel_ref(t,regi)
-    +
-    (p47_regiMaxCokeShare2050(regi)$(t.val ge 2150 AND (t.val lt 2070)$(sameas("%cm_PPCA_nonOECD%","on")))
-*    *
-*    p47_regiMaxCokeShare2070(regi)$(sameas("%cm_PPCA_nonOECD%","on") AND t.val ge 2070) 
-    * 0 )
-;
+* Fix sector shares to reference levels to prevent wild fluctuations due to coal phaseout
+Execute_Loadpoint 'input_ref' p11_share_sector = p11_share_sector;
 
 
 $endif.policy

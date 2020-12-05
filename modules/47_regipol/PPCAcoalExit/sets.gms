@@ -27,7 +27,16 @@ ppca_phase "Accession stage of the PPCA policy initiative (OECD = 2030, NonOECD 
 oecd
 nonoecd
 /
-;
 
+
+$ifthen %cm_PPCA_pol% == "demand"
+dem_sector  "Demand exit phases out steel, solids and total demand separately"
+/
+demand
+solids
+steel
+/
+$endif
+;
 
 *** EOF ./modules/47_regipol/PPCAcoalExit/sets.gms
