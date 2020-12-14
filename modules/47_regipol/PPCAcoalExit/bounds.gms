@@ -15,6 +15,7 @@ $ifthen.policy %cm_PPCA_pol% == "demand"
 
 * Fix sector shares to reference levels to prevent wild fluctuations due to coal phaseout
 Execute_Loadpoint 'input_ref' p11_share_sector = p11_share_sector;
+* Execute_Loadpoint 'input_ref' p47_demPe = vm_demPe.l;
 
 
 $endif.policy

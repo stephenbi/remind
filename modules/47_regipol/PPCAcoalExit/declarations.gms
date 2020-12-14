@@ -33,31 +33,31 @@ q47_se_floor(ttot,all_regi)
 * q47_emi_co2steel(ttot,all_regi)                             "CO2 emissions from steel production"
 * q47_ref_emi_steel(ttot,all_regi)                            "Limit CO2 emissions from steel production to reference scenario"
 $ifthen.OECD %cm_PPCA_OECD% == "on"
-q47_PPCA_OECD_demand_exit(ttot,all_regi)                    "OECD PPCA coal demand exit, represented as a maximum regional share of coal in total emissions after 2030"
-q47_PPCA_OECD_solids_exit(ttot,all_regi)                      "Coal solids except from steel sector phased out by OECD PPCA members in 2050"
-q47_PPCA_OECD_steel_exit(ttot,all_regi)                      "Metallurgical coal demand phased out by OECD PPCA members in 2050"
+q47_PPCA_OECD_demand_exit(all_regi)                    "OECD PPCA coal demand exit, represented as a maximum regional share of coal in total emissions after 2030"
+q47_PPCA_OECD_solids_exit(all_regi)                      "Coal solids except from steel sector phased out by OECD PPCA members in 2050"
+q47_PPCA_OECD_steel_exit(all_regi)                      "Metallurgical coal demand phased out by OECD PPCA members in 2050"
 $endif.OECD
 $ifthen.nonOECD %cm_PPCA_nonOECD% == "on"
-q47_PPCA_nonOECD_demand_exit(ttot,all_regi)                 "Non-OECD PPCA coal demand exit, represented as a maximum regional share of coal in total emissions after 2050"
-q47_PPCA_nonOECD_solids_exit(ttot,all_regi)                      "Coal solids except from steel sector phased out by Non-OECD PPCA members in 2070"
-q47_PPCA_nonOECD_steel_exit(ttot,all_regi)                      "Metallurgical coal demand phased out by Non-OECD PPCA members in 2070"
+q47_PPCA_nonOECD_demand_exit(all_regi)                 "Non-OECD PPCA coal demand exit, represented as a maximum regional share of coal in total emissions after 2050"
+q47_PPCA_nonOECD_solids_exit(all_regi)                      "Coal solids except from steel sector phased out by Non-OECD PPCA members in 2070"
+q47_PPCA_nonOECD_steel_exit(all_regi)                      "Metallurgical coal demand phased out by Non-OECD PPCA members in 2070"
 $endif.nonOECD
 ;
 
 $else.dem
 
-equations
-q47_seel_cap(ttot,all_regi,all_enty)                                "Limits total electricity production to a 10% increase above the respective reference PPCA scenario"
 $ifthen.power %cm_PPCA_pol% == "power"
+equations
 $ifthen.OECDon %cm_PPCA_OECD% == "on"
-q47_PPCA_OECD_power_phaseOut(ttot,all_regi,all_enty)                "OECD PPCA coal power exit, represented as a maximum regional coal share in electricity after 2030"
+q47_seel_cap(ttot,all_regi,all_enty)                                "Limits total electricity production to a 10% increase above the respective reference PPCA scenario"
+q47_PPCA_OECD_power_phaseOut(all_regi,all_enty)                "OECD PPCA coal power exit, represented as a maximum regional coal share in electricity after 2030"
 $endif.OECDon
 $ifthen.nonOECDon %cm_PPCA_nonOECD% == "on"
-q47_PPCA_nonOECD_power_phaseOut(ttot,all_regi,all_enty)            "Non-OECD PPCA coal power exit, represented as a maximum regional coal share in electricity after 2050"
+q47_PPCA_nonOECD_power_phaseOut(all_regi,all_enty)            "Non-OECD PPCA coal power exit, represented as a maximum regional coal share in electricity after 2050"
 $endif.nonOECDon
+;
 $endif.power
 
-;
 $endif.dem
 
 
