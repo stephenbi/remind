@@ -84,7 +84,7 @@
 * 
 * Input data revision: 5.964
 * 
-* Last modification (input data): Thu Dec 10 19:56:56 2020
+* Last modification (input data): Thu Dec 17 04:28:27 2020
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -139,7 +139,7 @@ option profile = 0;
 
 
 ***---------------------    Run name    -----------------------------------------
-$setGlobal c_expname  SSP2-coalDemandExit-PPCAreg50pc-1e4-emi
+$setGlobal c_expname  Npi-Cov_BAU_cfnew
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
@@ -200,13 +200,13 @@ $setglobal banking  off               !! def = off
 ***---------------------    45_carbonprice  -------------------------------------
 $setglobal carbonprice  NPi2018          !! def = none
 ***---------------------    47_regipol  -------------------------------------
-$setglobal regipol  regiCoalExit              !! def = none
+$setglobal regipol  PPCAcoalExit              !! def = none
 ***---------------------    50_damages    ---------------------------------------
 $setGlobal damages  off               !! def = off
 ***---------------------    51_internalizeDamages    ---------------------------------------
 $setGlobal internalizeDamages  off               !! def = off
 ***---------------------    70_water  -------------------------------------------
-$setglobal water  off                 !! def = off
+$setglobal water  heat                 !! def = off
 ***---------------------    80_optimization    ----------------------------------
 $setGlobal optimization  nash         !! def = nash
 ***---------------------    81_codePerformance    -------------------------------
@@ -349,7 +349,7 @@ cm_cprice_red_factor  = 1;         !! def = 1
 $setglobal cm_POPscen  pop_SSP2  !! def = pop_SSP2
 $setglobal cm_GDPscen  gdp_SSP2  !! def = gdp_SSP2
 $setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted by start_run() based on GDPscen) 
-cm_GDPcovid      = 0;            !! def = 0
+cm_GDPcovid      = 1;            !! def = 0
 
 *AG* and *CB* for cm_startyear greater than 2005, you have to copy the fulldata.gdx (rename it to: input_ref.gdx) from the run you want to build your new run onto.
 cm_startyear      = 2025;      !! def = 2005 for a BAU, 2015 for policy runs
@@ -440,7 +440,7 @@ $setGlobal cm_so2_out_of_opt  on         !! def = on
 $setGlobal c_skip_output  off        !! def = off
 $setGlobal cm_MOFEX  off        !! def = off
 $setGlobal cm_conoptv  conopt3    !! def = conopt3
-$setGlobal cm_ccsfosall  off        !! def = off
+$setGlobal cm_ccsfosall  on        !! def = off
 
 $setGlobal cm_APscen  SSP2          !! def = SSP2
 $setGlobal cm_magicc_calibrateTemperature2000  uncalibrated  !! def=uncalibrated
@@ -459,15 +459,15 @@ $setglobal cm_CES_calibration_default_prices  0.1  !!  def  =  0
 
 $setglobal c_testOneRegi_region  NA   !! def = EUR
 
-$setglobal cm_cooling_shares  static    !! def = static
+$setglobal cm_cooling_shares  dynamic    !! def = static
 $setglobal cm_techcosts  REG       !! def = REG
 $setglobal cm_regNetNegCO2  on       !! def = on
 
-$setglobal cm_PPCA_pol  power !! def = power
-$setglobal cm_PPCA_size  current     !! def = current
+$setglobal cm_PPCA_pol  none !! def = power
+$setglobal cm_PPCA_size  none     !! def = current
 $setglobal cm_COVID_coal_scen  BAU  !! def = none
-$setglobal cm_PPCA_OECD  on    !! def = off
-$setglobal cm_PPCA_nonOECD  on    !! def = off
+$setglobal cm_PPCA_OECD  off    !! def = off
+$setglobal cm_PPCA_nonOECD  off    !! def = off
 
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -387,8 +387,8 @@ $offdelim
 $Offlisting
 table   f_cf(tall,all_regi,all_te)     "installed capacity availability"
 $ondelim
-* $include "./core/input/f_cf_PPCA.cs3r"
-$include "./core/input/f_cf.cs3r"
+$include "./core/input/f_cf_PPCA.cs3r"
+* $include "./core/input/f_cf.cs3r"
 $offdelim
 ;
 $Onlisting
@@ -402,8 +402,8 @@ pm_cf(ttot,regi,"elh2VRE") = 0.6;
 
 table p_earlyreti_adjRate(all_regi,all_te)  "extra retirement rate for technologies in countries with relatively old fleet"
 $ondelim
-* $include "./core/input/p_earlyRetirementAdjFactor_PPCA.cs3r"
-$include "./core/input/p_earlyRetirementAdjFactor.cs3r"
+* $include "./core/input/p_earlyRetirementAdjFactor.cs3r"
+$include "./core/input/p_earlyRetirementAdjFactor_PPCA.cs3r"
 $offdelim
 ;
 
