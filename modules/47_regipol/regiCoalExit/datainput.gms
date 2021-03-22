@@ -6,6 +6,16 @@
 *** |  Contact: remind@pik-potsdam.de
 *** SOF ./modules/47_regipol/regiCoalExit/datainput.gms
 
+$ifthen.cov not %cm_COVID_coal_scen% == "none"
+parameter p47_coalCapCOVID(tall,all_regi,COV_coal) "2025 coal capacity scenarios based on COVID recovery scenarios"
+/
+$ondelim
+$include "./modules/47_regipol/regiCoalExit/input/p47_coalCapCOVID.cs4r"
+$offdelim
+/
+;
+$endif.cov
+
 * Execute_Loadpoint 'input_opt',
 *     p47_coalExtr600 = vm_fuExtr.l,
 *     p47_coalDem600 = vm_demPe.l,

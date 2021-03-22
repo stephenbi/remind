@@ -775,6 +775,10 @@ $elseif.pol %cm_PPCA_pol% == "demand"
     + 0.11$(p47_max_coal_dem_share_oecd(regi,"solids") lt 0.05 AND ttot.val le 2030 AND sameas(te,"coaltr"))
 $endif.pol
 $endif.oecd
+    + 0.06$(sameas("%cm_PPCA_pol%","none") and not sameas("%cm_COVID_coal_scen%","Brown") and ttot.val le 2025 and p47_coalCapCOVID("2025",regi,"%cm_COVID_coal_scen%") le 0.55 * p_PE_histCap("2020",regi,"pecoal","seel"))
+$elseif.ppca %regipol% == "regiCoalExit"
+    + (0.11 - p_earlyreti_adjRate(regi,te))$(ttot.val le 2030 AND (sameas(te,"coalchp") OR sameas(te,"igcc") OR sameas(te,"pc")))
+    + (0.11 - p_earlyreti_adjRate(regi,te))$((sameas("%cm_coalExitRegi%","demand-PPCA-1e4") OR sameas("%cm_coalExitRegi%","demand-PPCA50pc-1e4") OR sameas("%cm_coalExitRegi%","demand-PPCA5pc-1e4")) AND ttot.val le 2030 AND (sameas(te,"coaltr") OR sameas(te,"pcc") OR sameas(te,"pco") OR sameas(te,"igccc") OR sameas(te,"coalhp") OR sameas(te,"coalgas") OR sameas(te,"coalftrec") OR sameas(te,"coalh2") OR sameas(te,"coalh2c")))
 $endif.ppca
     )
 ;

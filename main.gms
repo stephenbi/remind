@@ -84,7 +84,7 @@
 * 
 * Input data revision: 5.964
 * 
-* Last modification (input data): Thu Dec 17 04:28:27 2020
+* Last modification (input data): Fri Mar 19 14:37:06 2021
 * 
 *###################### R SECTION END (VERSION INFO) ###########################
 
@@ -139,7 +139,7 @@ option profile = 0;
 
 
 ***---------------------    Run name    -----------------------------------------
-$setGlobal c_expname  Npi-Cov_BAU_cfnew
+$setGlobal c_expname  PPCA_power-nonOECD-2pCHA-psc1e6_5cap_distMean-BAU
 
 ***------------------------------------------------------------------------------
 ***                           MODULES
@@ -244,6 +244,9 @@ cm_tradecost_bio       "choose financal tradecosts for biomass (purpose grown pe
 cm_1stgen_phaseout    "choose if 1st generation biofuels should phase out after 2030 (vm_deltaCap=0)"
 cm_cprice_red_factor  "reduction factor for price on co2luc when calculating the revenues. Replicates the reduction applied in MAgPIE"
 cm_startyear          "first optimized modelling time step [year]"
+* cm_rentdisc_startyr        "year in which fossil and uranium extraction cost curves begin"
+cm_NPi_startyr         "year in which NPi policies should begin to take effect"
+cm_EVRE               "PPCA-specific bound"
 c_start_budget        "start of GHG budget limit"
 cm_prtpScen           "pure rate of time preference standard values"
 cm_fetaxscen          "choice of final energy tax path, subsidy path and inconvenience cost path, values other than 0 make setting module 21_tax on"
@@ -313,7 +316,7 @@ cm_FlexTaxFeedback          "switch deciding whether flexibility tax feedback on
 cm_iteration_max       = 1;     !! def = 1
 c_solver_try_max       = 2;     !! def = 2
 c_keep_iteration_gdxes = 0;     !! def = 0
-cm_nash_autoconverge   = 1;     !! def = 1
+cm_nash_autoconverge   = 2;     !! def = 1
 $setglobal cm_MAgPIE_coupling  off     !! def = "off"
 
 cm_emiscen        = 9;         !! def = 1
@@ -352,7 +355,10 @@ $setglobal c_GDPpcScen  SSP2     !! def = gdp_SSP2   (automatically adjusted by 
 cm_GDPcovid      = 1;            !! def = 0
 
 *AG* and *CB* for cm_startyear greater than 2005, you have to copy the fulldata.gdx (rename it to: input_ref.gdx) from the run you want to build your new run onto.
-cm_startyear      = 2025;      !! def = 2005 for a BAU, 2015 for policy runs
+cm_startyear      = 2035;      !! def = 2005 for a BAU, 2015 for policy runs
+* cm_rentdisc_startyr     = 2005;     !! def = 2025
+cm_NPi_startyr     = 2025;      !! def = 2025
+$setglobal cm_EVRE  none     !! def = none
 c_start_budget    = 2100;      !! def = 2100
 
 cm_prtpScen         = 3;         !! def = 3
@@ -463,12 +469,13 @@ $setglobal cm_cooling_shares  dynamic    !! def = static
 $setglobal cm_techcosts  REG       !! def = REG
 $setglobal cm_regNetNegCO2  on       !! def = on
 
-$setglobal cm_PPCA_pol  none !! def = power
-$setglobal cm_PPCA_size  none     !! def = current
+$setglobal cm_PPCA_pol  power !! def = power
+$setglobal cm_PPCA_size  2p     !! def = current
 $setglobal cm_COVID_coal_scen  BAU  !! def = none
-$setglobal cm_PPCA_OECD  off    !! def = off
-$setglobal cm_PPCA_nonOECD  off    !! def = off
+$setglobal cm_PPCA_OECD  on    !! def = off
+$setglobal cm_PPCA_nonOECD  on    !! def = off
 
+$setglobal cm_coalExitRegi  none   !! def = none
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------

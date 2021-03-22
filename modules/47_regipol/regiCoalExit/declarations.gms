@@ -18,4 +18,10 @@ Parameter
     p47_Mport(ttot,all_regi,all_enty)    "placeholder parameter to read vm_Mport from Budg600 gdx"    
 ;
 
+$ifthen.cov not %cm_COVID_coal_scen% == "none"
+equations
+q47_CovidCoalCap(ttot,all_regi,cov_coal)                                  "2025 post-COVID Coal capacity scenarios upper limit"
+;
+$endif.cov
+
 *** EOF ./modules/47_regipol/regiCoalExit/declarations.gms

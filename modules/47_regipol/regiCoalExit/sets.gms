@@ -7,13 +7,21 @@
 *** SOF ./modules/47_regipol/regiCoalExit/sets.gms
 
 SETS
+	cov_coal "COVID coal sector recovery scenario"
+	/
+	BAU
+	Green
+	Brown
+	Norm
+	/
+
 	coal_sup_regi(all_regi) "coalition willing to phase out coal extraction" / EUR, JPN, LAM, MEA, NEU /
 	coal_sup_regi_50pc(all_regi) "coalition willing to phase out coal extraction" / CAZ, EUR, JPN, LAM, MEA, NEU, USA /
 	coal_sup_regi_5pc(all_regi) "coalition willing to phase out coal extraction" / CAZ, CHA, EUR, JPN, LAM, MEA, NEU, USA /
 	coal_dem_regi(all_regi) "coalition willing to phase out coal consumption" / CAZ, EUR, LAM, NEU, USA / !!swing regions - USA, CAZ, SSA 
-	coal_PPCA_regi(all_regi) "coalition willing to phase out coal power generation" / CAZ, EUR /  
-	PPCA_regi_50prob(all_regi)  "Countries with a 50% probability of joining the PPCA Jewell et al 2019" / CAZ, EUR, LAM, MEA, USA /
-	PPCA_regi_5prob(all_regi)  "Countries with a 5% probability of joining the PPCA Jewell et al 2019" / CAZ, EUR, JPN, LAM, MEA, NEU, REF, USA /
+	coal_PPCA_regi(all_regi) "coalition willing to phase out coal power generation" / LAM, MEA, EUR /  
+	PPCA_regi_50prob(all_regi)  "Countries with a 50% probability of joining the PPCA Jewell et al 2019" / CAZ, EUR, LAM, JPN, MEA, USA /
+	PPCA_regi_5prob(all_regi)  "Countries with a 5% probability of joining the PPCA Jewell et al 2019" / CAZ, EUR, JPN, LAM, MEA, NEU, REF, USA, CHA, IND, OAS, SSA /
 	coal_exp_regi(all_regi) "coalition willing to phase out coal exports" / CHA, EUR, IND, JPN, MEA, NEU, OAS /
 	coal_imp_regi(all_regi) "coalition willing to phase out coal imports" / CAZ, EUR, IND, LAM, MEA, NEU, REF, SSA, USA /
 	OECD_regi(all_regi)		"OECD regions"		/ CAZ, EUR, JPN, NEU, USA / 

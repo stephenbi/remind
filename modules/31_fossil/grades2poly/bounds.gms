@@ -14,6 +14,19 @@ loop(rlf$(NOT sameas(rlf,"1")),
 );
 
 v31_fuExtrCum.lo(t,regi,peFos(enty),"1")$((t.val ge 2010) AND (pm_ffPolyCumEx(regi,enty,"max"))) = 1e-9;
+* v31_fuExtrCum.lo(t,regi,peFos(enty),"1")$((t.val ge cm_fuEx_startyr) AND (pm_ffPolyCumEx(regi,enty,"max"))) = 1e-9;
+
+* *SB* For cases in which cm_startyear is later than cm_fuEx_startyr, fix the timesteps in between to input_ref
+* if(cm_startyear gt cm_fuEx_startyr,
+* 	Execute_Loadpoint 'input_ref' s31_startyear = cm_startyear;
+*   if(cm_startyear gt s31_startyear,
+* 		Execute_Loadpoint 'input_ref' p31_fuExtrCumRef = v31_fuExtrCum.l;
+* 		Execute_Loadpoint 'input_ref' p31_fuExtrRef = vm_fuExtr.l;
+* 		vm_fuExtr.fx(t,regi,peFos(enty),"1")$(t.val ge cm_fuEx_startyr AND t.val lt cm_startyear) = p31_fuExtrRef(t,regi,enty,"1");
+* 		v31_fuExtrCum.fx(t,regi,peFos(enty),"1")$(t.val ge cm_fuEx_startyr AND t.val lt cm_startyear) = p31_fuExtrCumRef(t,regi,enty,"1");
+*	);
+* );
+* display vm_fuExtr.l, p31_fuExtrRef, v31_fuExtrCum.l, p31_fuExtrCumRef;
 
 vm_costFuEx.up(t,regi,peFos) = 10.0;
 
@@ -28,7 +41,7 @@ p31_rentdisc("pegas")   = cm_rentdiscgas;
 p31_rentdisc2("pegas")  = cm_rentdiscgas2;
 p31_rentconv("pegas")   = cm_rentconvgas;
 
-p31_rentdisctot(ttot, enty)$(p31_rentconv(enty) gt 0) =  (p31_rentdisc(enty) + (pm_ttot_val(ttot) - cm_startyear) * (p31_rentdisc2(enty)-p31_rentdisc(enty))/p31_rentconv(enty));
+p31_rentdisctot(ttot, enty)$(p31_rentconv(enty) gt 0) =  (p31_rentdisc(enty) + (pm_ttot_val(ttot) - s31_fuEx_startyr) * (p31_rentdisc2(enty)-p31_rentdisc(enty))/p31_rentconv(enty));
 p31_rentdisctot(ttot, enty)$(ttot.val gt 2010 + p31_rentconv(enty)) = p31_rentdisc2(enty);
 
 display

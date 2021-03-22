@@ -9,10 +9,17 @@
 parameter p47_coalCapCOVID(tall,all_regi,COV_coal) "2025 coal capacity scenarios based on COVID recovery scenarios"
 /
 $ondelim
-$include "./modules/47_regipol/PPCAcoalExit/input/p47_coalCapCOVID.cs4r"
+$include "./modules/47_regipol/PPCAcoalExit/input/p47_coalCapCOVID_mar10.cs4r"
+* $include "./modules/47_regipol/PPCAcoalExit/input/p47_coalCapCOVID.cs4r"
 $offdelim
 /
 ;
+
+* *** PPCA coal exit scenario cascade should all have the same C price but includes runs with different startyears
+* $ifthen.ppca %cm_PPCA_nonOECD% == "on"
+* Execute_Loadpoint "input_opt" pm_taxCO2eq = pm_taxCO2eq;
+* $endif.ppca
+
 
 $ifthen.phase1 %cm_PPCA_OECD% == "on"
 
@@ -20,6 +27,30 @@ $ifthen.polscen %cm_PPCA_pol% == "power"
 *** 2030 OECD PPCA phase-out
 parameter p47_max_coal_el_share_oecd(all_regi)    "Maximum share of met coal emissions from total coal emissions after the OECD phases out steel sector coal demand"
 /
+$ifthen.recovery1 %cm_COVID_coal_scen% == "none"
+$ifthen.coalition %cm_PPCA_size% == "current"
+$ondelim
+$include "./modules/47_regipol/PPCAcoalExit/input/f47_OECD_noCOV_power_current.cs4r"
+$offdelim
+
+$elseif.coalition %cm_PPCA_size% == "1p"
+$ondelim
+$include "./modules/47_regipol/PPCAcoalExit/input/f47_OECD_noCOV_power_1p.cs4r"
+$offdelim
+
+$elseif.coalition %cm_PPCA_size% == "2p"
+$ondelim
+$include "./modules/47_regipol/PPCAcoalExit/input/f47_OECD_noCOV_power_2p.cs4r"
+$offdelim
+
+$elseif.coalition %cm_PPCA_size% == "3p"
+$ondelim
+$include "./modules/47_regipol/PPCAcoalExit/input/f47_OECD_noCOV_power_3p.cs4r"
+$offdelim
+
+$endif.coalition
+$endif.recovery1
+
 $ifthen.recovery %cm_COVID_coal_scen% == "BAU"
 $ifthen.coalition1 %cm_PPCA_size% == "current"
 $ondelim
@@ -205,6 +236,30 @@ $ifthen.phase2 %cm_PPCA_nonOECD% == "on"
 $ifthen.polscen2 %cm_PPCA_pol% == "power"
 parameter p47_max_coal_el_share_nonoecd(all_regi)     "Maximum regional coal share from 2050 on as a result of non-OECD PPCA countries phasing out coal"
 /
+$ifthen.recovery1 %cm_COVID_coal_scen% == "none"
+$ifthen.coalition %cm_PPCA_size% == "current"
+$ondelim
+$include "./modules/47_regipol/PPCAcoalExit/input/f47_nonOECD_noCOV_power_current.cs4r"
+$offdelim
+
+$elseif.coalition %cm_PPCA_size% == "1p"
+$ondelim
+$include "./modules/47_regipol/PPCAcoalExit/input/f47_nonOECD_noCOV_power_1p.cs4r"
+$offdelim
+
+$elseif.coalition %cm_PPCA_size% == "2p"
+$ondelim
+$include "./modules/47_regipol/PPCAcoalExit/input/f47_nonOECD_noCOV_power_2p.cs4r"
+$offdelim
+
+$elseif.coalition %cm_PPCA_size% == "3p"
+$ondelim
+$include "./modules/47_regipol/PPCAcoalExit/input/f47_nonOECD_noCOV_power_3p.cs4r"
+$offdelim
+
+$endif.coalition
+$endif.recovery1
+
 $ifthen.recovery4 %cm_COVID_coal_scen% == "BAU"
 $ifthen.coalition4 %cm_PPCA_size% == "current"
 $ondelim

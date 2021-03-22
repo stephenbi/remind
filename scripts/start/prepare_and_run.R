@@ -262,6 +262,39 @@ prepare <- function() {
   #  source("scripts/input/create_ExogSameAsPrevious_CO2price_file.R")
   #  create_ExogSameAsPrevious_CO2price_file(as.character(cfg$files2export$start["input_ref.gdx"]))
   #}  
+
+  # For PPCA coal phase-out scenarios, the logit model below is run prior to REMIND using data from input_ref 
+  if(!is.null(cfg$gms$regipol) && cfg$gms$regipol=="PPCAcoalExit" && cfg$gms$cm_PPCA_pol!="none") {
+    refgdx <- as.character(cfg$files2export$start["input_ref.gdx"])
+    cat("\n",refgdx,"\n")
+    cat(cfg$title,"\n")
+    cat(cfg$results_folder,"\n")
+    cat(paste0(gsub("fulldata.gdx","REMIND_generic_",refgdx),strsplit(strsplit(refgdx,"output/",fixed=T)[[1]][2],"_202[0-9]",fixed=F)[[1]][1],".mif"),"\n")
+    if (file.exists(refgdx)) {
+      count <- 0
+      while(!file.exists(paste0(gsub("fulldata.gdx","REMIND_generic_",refgdx),strsplit(strsplit(refgdx,"output/",fixed=T)[[1]][2],"_202[0-9]",fixed=F)[[1]][1],".mif"))) {
+        Sys.sleep(60)
+        count <- count+1
+        if (count > 30)  {
+          stop(paste0(gsub("fulldata.gdx","REMIND_generic_",refgdx),strsplit(strsplit(refgdx,"output/",fixed=T)[[1]][2],"_202[0-9]",fixed=F)[[1]][1],".mif"),
+            " not found - please ensure the reference run is valid and reporting scripts have finished running.")
+        }
+      }
+    }else {
+      stop(refgdx," not found - please provide gdx from reference run")
+    }
+    cat("Running logit model to determine PPCA coalition membership...\n")
+    if (grepl("distMean",cfg$title)) {
+      source("scripts/input/logit_PPCA.R")
+      logit_PPCA(refgdx=refgdx, recovery=cfg$gms$cm_COVID_coal_scen, size=cfg$gms$cm_PPCA_size, policy=cfg$gms$cm_PPCA_pol,
+        oecd=cfg$gms$cm_PPCA_OECD, nonoecd=cfg$gms$cm_PPCA_nonOECD, outputfolder=cfg$results_folder,rev=cfg$revision, title=cfg$title)
+    }else {
+      source("scripts/input/regShare_logit_PPCA.R")
+      regShare_logit_PPCA(refgdx=refgdx, recovery=cfg$gms$cm_COVID_coal_scen, size=cfg$gms$cm_PPCA_size, policy=cfg$gms$cm_PPCA_pol,
+        oecd=cfg$gms$cm_PPCA_OECD, nonoecd=cfg$gms$cm_PPCA_nonOECD, outputfolder=cfg$results_folder,rev=cfg$revision, title=cfg$title)
+    }
+  }
+
   
   # select demand pathway for transportation: options are conv (conventional demand pathway) and wise (wiseways, limited demand)
   if(cfg$gms$transport == "edge_esm"){
