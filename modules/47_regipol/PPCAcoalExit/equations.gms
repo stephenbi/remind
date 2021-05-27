@@ -43,7 +43,7 @@ sum(ttot$(ttot.val ge 2030 AND ttot.val le 2100),
           pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS(ttot,regi,enty,enty3,te,rlf) ) )
         )
     )
-      + (1e-5 - p47_max_coal_el_share_oecd(regi))$(p47_max_coal_el_share_oecd(regi) le 1e-5)
+      + (4e-5 - p47_max_coal_el_share_oecd(regi))$(p47_max_coal_el_share_oecd(regi) le 4e-5)
 ;
 $endif.PPCA_OECD
 
@@ -71,10 +71,10 @@ sum(ttot$(ttot.val ge 2050 AND ttot.val le 2100),
           pm_prodCouple(regi,enty,enty3,te,enty2) * vm_co2CCS(ttot,regi,enty,enty3,te,rlf) ) )         
         )
     )
-      + (1e-5 - p47_max_coal_el_share_nonoecd(regi))$(p47_max_coal_el_share_nonoecd(regi) le 1e-5)
+      + (4e-5 - p47_max_coal_el_share_nonoecd(regi))$(p47_max_coal_el_share_nonoecd(regi) le 4e-5)
       ;   
 
-q47_power_decline(ttot,regi,enty2)$((ttot.val gt 2050 AND sameas(enty2,"seel")AND p47_max_coal_el_share_nonoecd(regi) lt 1e-5 AND p47_max_coal_el_share_nonoecd(regi) gt 0 ) OR ttot.val gt 2100)..
+q47_power_decline(ttot,regi,enty2)$((ttot.val gt 2050 AND sameas(enty2,"seel")AND p47_max_coal_el_share_nonoecd(regi) le 1e-4 AND p47_max_coal_el_share_nonoecd(regi) gt 0 ) OR ttot.val gt 2100)..
 sum(pe2se("pecoal",enty2,te)$(sameas(te,"pc") OR sameas(te,"coalchp") OR sameas(te,"igcc")),
     vm_prodSe(ttot,regi,"pecoal",enty2,te))
     + sum(pc2te("pecoal",entySE(enty3),te,enty2)$(sameas(te,"coalchp")),
@@ -104,7 +104,7 @@ q47_PPCA_OECD_demand_exit(regi)$(p47_max_coal_dem_share_oecd(regi,"demand") gt 0
 *          + (0.01 - p47_max_coal_dem_share_oecd(regi,"demand"))$(ttot.val le 2035 AND p47_max_coal_dem_share_oecd(regi,"demand") lt 0.01)
     )
     * vm_emiAll(ttot,regi,"co2")
-     + (1e-5 - p47_max_coal_dem_share_oecd(regi,"demand"))$(p47_max_coal_dem_share_oecd(regi,"demand") le 1e-5) 
+     + (4e-4 - p47_max_coal_dem_share_oecd(regi,"demand"))$(p47_max_coal_dem_share_oecd(regi,"demand") le 4e-4) 
     )
     ;
 
@@ -120,7 +120,7 @@ q47_PPCA_OECD_solids_exit(regi)$(p47_max_coal_dem_share_oecd(regi,"solids") gt 0
 *         + (0.01 - p47_max_coal_dem_share_oecd(regi,"solids"))$(ttot.val le 2035 AND p47_max_coal_dem_share_oecd(regi,"solids") lt 0.01)
     )
         * vm_emiAll(ttot,regi,"co2")
-      + (1e-5 - p47_max_coal_dem_share_oecd(regi,"solids"))$(p47_max_coal_dem_share_oecd(regi,"solids") le 1e-5)
+      + (4e-4 - p47_max_coal_dem_share_oecd(regi,"solids"))$(p47_max_coal_dem_share_oecd(regi,"solids") le 4e-4)
     )
     ;
 
@@ -142,7 +142,7 @@ q47_PPCA_OECD_steel_exit(regi)$(p47_max_coal_dem_share_oecd(regi,"steel") gt 0).
 *         + (0.01 - p47_max_coal_dem_share_oecd(regi,"steel"))$(ttot.val le 2045 AND p47_max_coal_dem_share_oecd(regi,"steel") lt 0.01)
     )
         * vm_emiAll(ttot,regi,"co2")
-        + (1e-5 - p47_max_coal_dem_share_oecd(regi,"steel"))$(p47_max_coal_dem_share_oecd(regi,"steel") le 1e-5 AND ttot.val le 2045)
+        + (4e-4 - p47_max_coal_dem_share_oecd(regi,"steel"))$(p47_max_coal_dem_share_oecd(regi,"steel") le 4e-4 AND ttot.val le 2045)
     )
       ;
 
@@ -162,7 +162,7 @@ q47_PPCA_nonOECD_demand_exit(regi)$(p47_max_coal_dem_share_nonoecd(regi,"demand"
 *    + (0.01 - p47_max_coal_dem_share_nonoecd(regi,"demand"))$(ttot.val le 2060 AND p47_max_coal_dem_share_nonoecd(regi,"demand") lt 0.01 AND p47_max_coal_dem_share_oecd(regi,"demand") ge 0.01)
     )
     * vm_emiAll(ttot,regi,"co2")
-    + (1e-5 - p47_max_coal_dem_share_nonoecd(regi,"demand"))$(p47_max_coal_dem_share_nonoecd(regi,"demand") le 1e-5)
+    + (4e-4 - p47_max_coal_dem_share_nonoecd(regi,"demand"))$(p47_max_coal_dem_share_nonoecd(regi,"demand") le 4e-4)
     )
       ;
 
@@ -176,7 +176,7 @@ q47_PPCA_nonOECD_solids_exit(regi)$(p47_max_coal_dem_share_nonoecd(regi,"solids"
 *        + (0.01 - p47_max_coal_dem_share_nonoecd(regi,"solids"))$(ttot.val le 2060 AND p47_max_coal_dem_share_nonoecd(regi,"solids") lt 0.01 AND p47_max_coal_dem_share_oecd(regi,"solids") ge 0.01)
     )
       * vm_emiAll(ttot,regi,"co2")
-    + (1e-5 - p47_max_coal_dem_share_nonoecd(regi,"solids"))$(p47_max_coal_dem_share_nonoecd(regi,"solids") le 1e-5)
+    + (4e-4 - p47_max_coal_dem_share_nonoecd(regi,"solids"))$(p47_max_coal_dem_share_nonoecd(regi,"solids") le 4e-4)
     )
     ;
 
@@ -197,11 +197,11 @@ q47_PPCA_nonOECD_steel_exit(regi)$(p47_max_coal_dem_share_nonoecd(regi,"steel") 
 *        + (0.01 - p47_max_coal_dem_share_nonoecd(regi,"steel"))$(ttot.val le 2070 AND p47_max_coal_dem_share_nonoecd(regi,"steel") lt 0.01  AND p47_max_coal_dem_share_oecd(regi,"steel") ge 0.01)
     )
       * vm_emiAll(ttot,regi,"co2")
-    + (1e-5 - p47_max_coal_dem_share_nonoecd(regi,"steel"))$(p47_max_coal_dem_share_nonoecd(regi,"steel") le 1e-5 AND ttot.val le 2070)
+    + (4e-4 - p47_max_coal_dem_share_nonoecd(regi,"steel"))$(p47_max_coal_dem_share_nonoecd(regi,"steel") le 4e-4 AND ttot.val le 2070)
     )
       ;
 
-q47_demand_decline(ttot,regi,enty2)$((ttot.val gt 2050 AND sameas(enty2,"seel") AND p47_max_coal_dem_share_nonoecd(regi,"demand") gt 0 AND p47_max_coal_dem_share_nonoecd(regi,"demand") lt 1e-5) OR ttot.val gt 2100)..
+q47_demand_decline(ttot,regi,enty2)$((ttot.val gt 2050 AND sameas(enty2,"seel") AND p47_max_coal_dem_share_nonoecd(regi,"demand") gt 0 AND p47_max_coal_dem_share_nonoecd(regi,"demand") lt 1e-3) OR ttot.val gt 2100)..
 sum(emi2te("pecoal",entySe,te,"co2"),
       vm_emiTeDetail(ttot,regi,"pecoal",entySe,te,"co2"))
       =l=

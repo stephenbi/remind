@@ -16,22 +16,17 @@ $ifthen.ref not "%cm_PPCA_size%" == "none"
 Execute_Loadpoint 'input_ref' p47_cap = vm_cap.l;
 
 * Set upper bound on all technologies to 4x reference scenario to prevent corner solutions
-loop(t,
-    loop(regi,
-        loop(te,
-            if(p47_cap(t,regi,te,"1")$(t.val ge cm_startyear) gt 1e-4,
-                if(vm_cap.up(t,regi,te,"1")$(t.val ge cm_startyear) gt (4 * p47_cap(t,regi,te,"1")),
-                    vm_cap.up(t,regi,te,"1")$(t.val ge cm_startyear) = 4 * p47_cap(t,regi,te,"1")
-                );
-                elseif(p47_cap(t,regi,te,"1")$(t.val ge cm_startyear) le 1e-4,
-                    if(vm_cap.up(t,regi,te,"1")$(t.val ge cm_startyear) gt (1e3 * p47_cap(t,regi,te,"1")),
-                        vm_cap.up(t,regi,te,"1")$(t.val ge cm_startyear) = 1e3 * p47_cap(t,regi,te,"1")
-                    );
-                );
-            );
-        );
-    );   
-);
+* loop(t$(t.val ge cm_startyear),
+*     loop(regi,
+*         loop(te,
+*             if( (p47_cap(t,regi,te,"1") gt 1e-4 and vm_cap.up(t,regi,te,"1") gt (10 * p47_cap(t,regi,te,"1")) ),
+*                 vm_cap.up(t,regi,te,"1") = 10 * p47_cap(t,regi,te,"1");
+*             elseif(p47_cap(t,regi,te,"1") le 1e-4 and vm_cap.up(t,regi,te,"1") gt (1e3 * p47_cap(t,regi,te,"1")) ),
+*                 vm_cap.up(t,regi,te,"1") = 1e3 * p47_cap(t,regi,te,"1");
+*             );
+*         );
+*     );
+* );
 
 $ifthen.cov_coal not %cm_COVID_coal_scen% == "none"
 vm_cap.fx("2025",regi,"pc",rlf) = p47_cap("2025",regi,"pc",rlf);
