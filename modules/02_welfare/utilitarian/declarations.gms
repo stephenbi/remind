@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -13,6 +13,8 @@ parameters
 pm_welf(tall)                                     "Weight parameter in the welfare function to avoid jumps for years between differnet time step lengths"
 pm_w(all_regi)                                    "Negishi weights"
 pm_prtp(all_regi)                                 "Pure rate of time preference"
+
+pm_sccIneq(tall,all_regi)			  "inequality term in the SCC calculation"
 
 $ifthen.inconv %cm_INCONV_PENALTY% == "on"
 p02_inconvpen_lap(ttot,all_regi,all_te)           "Parameter for inconvenience penalty for local air pollution. [T$/TWa at Consumption of 1000$/cap]"
@@ -37,12 +39,13 @@ v02_sesoInconvPenSlack(ttot,all_regi)             "Slack to avoid negative incon
 $endif.inconv
 ;
 
-positive variables
 $IFTHEN.INCONV_bioSwitch "%cm_INCONV_PENALTY_FESwitch%" == "on"
+positive variables
 v02_NegInconvPenFeBioSwitch(ttot,all_regi,all_enty,all_enty,emi_sectors,all_emiMkt) "Negative inconvenience penalty in the welfare function for bio/synfuel shares switch between sectors and emissions markets"
 v02_PosInconvPenFeBioSwitch(ttot,all_regi,all_enty,all_enty,emi_sectors,all_emiMkt) "Positive inconvenience penalty in the welfare function for bio/synfuel shares switch between sectors and emissions markets"
-$ENDIF.INCONV_bioSwitch
 ;
+$ENDIF.INCONV_bioSwitch
+
 
 ***-------------------------------------------------------------------------------
 ***                                   EQUATIONS

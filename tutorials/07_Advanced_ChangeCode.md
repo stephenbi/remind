@@ -1,8 +1,3 @@
----
-output:
-  html_document: default
-  pdf_document: default
----
 Advanced: Change REMIND GAMS Code
 ================
 Florian Humpenöder (<humpenoeder@pik-potsdam.de>), Lavinia Baumstark (<baumstark@pik-potsdam.de>)
@@ -32,7 +27,7 @@ LOOP
       * PRESOLVE
       * SOLVE     ---> solve statement in module 80_optimization
       * POSTSOLVE
-      
+
         ---> write gdx
 ----------------------------------------------- END OF NEGISHI/NASH ITERATATION LOOP ----
 
@@ -48,9 +43,9 @@ The REMIND GAMS code follows a Coding Etiquette (found in the beginning of the f
 How to make a new module or realization in REMIND
 ========================================================
 
-If you want to create a **new module** in REMIND first think about the interfaces between the core code and your new module. This helps you to design your module. 
+If you want to create a **new module** in REMIND first think about the interfaces between the core code and your new module. This helps you to design your module.
 
-For creating a new module you can use the function `module.skeleton` from the R package `gms`. Start R and set the working directory to the REMIND folder (e.g. `setwd("~/work/remindmodel")`). 
+For creating a new module you can use the function `module.skeleton` from the R package `gms`. Start R and set the working directory to the REMIND folder (e.g. `setwd("~/work/remindmodel")`).
 
 ``` r
 gms::module.skeleton(100, "bla", c("on", "off"))
@@ -66,6 +61,11 @@ gms::module.skeleton(100, "bla", c("on", "off", "new"))
 It creates all additional gams files for your new realization "new" of the existing module `100_bla`. You can find more information about the function `module_skeleton` in its documentation.
 
 After you have created all of your new files and lines for the new module or realization you have to add the description of this new feature in the `main.gms` by hand.
+
+Renaming switches
+=================
+Be careful when renaming switches or changing their behavior. Make sure you also update all scenario config files in the [`./config`](../config/) directory and all its subdirectories.
+Please also add the old name of the switch to `forbiddenColumnNames` of [`readCheckScenarioConfig()`](../scripts/start/readCheckScenarioConfig.R) with an explanation how the switch should be adapted and a link to further information.
 
 Compiling and Testing
 =====================

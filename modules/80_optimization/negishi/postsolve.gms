@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -76,7 +76,7 @@ p80_nw(iteration+1,regi) = pm_w(regi);
 p80_defic_sum(iteration+1) = sum(regi, abs(p80_defic(iteration,regi)));
 p80_defic_sumLast = p80_defic_sum(iteration+1);
 
-display p80_alpha_nw, s80_alpha_avg, pm_pvpRegi, pm_pvp, pm_w, p80_defic, p80_defic_sum, p80_defic_sumLast;
+display p80_alpha_nw, s80_alpha_avg, pm_pvp, pm_w, p80_defic, p80_defic_sum, p80_defic_sumLast;
 OPTION decimals =5;
 display p80_nw;
 OPTION decimals =3;

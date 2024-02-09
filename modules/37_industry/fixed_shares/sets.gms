@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -47,7 +47,7 @@ Sets
     co2steel
   /
 
-  macBaseInd37(all_enty,secInd37)   "FE and industry combinations that have emissions"
+  emiInd37_fe2sec(all_enty,secInd37)   "FE and industry combinations that have emissions"
   /
     (fesos, fehos, fegas) . (cement, chemicals, steel, otherInd)
     co2cement_process     . cement
@@ -80,7 +80,7 @@ Sets
     enhgai . (fegai, feh2i)
   /
 
- 
+
   fe2ppfEn37(all_enty,all_in)   "match ESM entyFe to ppfEn"
   /
     fesos . fesoi

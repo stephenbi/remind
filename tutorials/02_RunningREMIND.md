@@ -63,7 +63,7 @@ The first line loads the `piam` environment once you log onto the cluster via co
 
 Open a console session on the cluster and create a folder on the cluster where you want to store REMIND. It is recommended not to use the `home` directory. For your first experiments you can use a subfolder of the `/p/tmp/YourPIKName/` directory (only stored for 3 months).
 
-In case you are using console and are not familiar with shell commands, google a list of basic shell commands such as `mkdir` to create a folder or `cd /p/tmp/YourPIKName/` to switch to your folder. Download REMIND into a directory in this folder via `git clone` (see tutorial [00_Git_and_GitHub_workflow](00_Git_and_GitHub_workflow.md)).
+In case you are using console and are not familiar with shell commands, google a list of basic shell commands such as `mkdir` to create a folder or `cd /p/tmp/YourPIKName/` to switch to your folder. Download REMIND into a directory in this folder via `cloneremind` (see tutorial [00_Git_and_GitHub_workflow](00_Git_and_GitHub_workflow.md)).
 
 Go to your REMIND main folder (i.e. it contains subfolders such as `config`, `core`, and `modules`) and start a REMIND run by typing:
 
@@ -71,7 +71,8 @@ Go to your REMIND main folder (i.e. it contains subfolders such as `config`, `co
 Rscript start.R
 ```
 
-Without additional arguments this starts a single REMIND run using the settings from [`config/default.cfg`](../config/default.cfg) and [`main.gms`](../main.gms). Also, on Windows, you can double-click the `start.cmd` file.
+Without additional arguments this starts a single REMIND run using the settings from [`config/default.cfg`](../config/default.cfg) and [`main.gms`](../main.gms).
+Also, on Windows, you can double-click the `start_windows.cmd` file.
 You can control the script's behavior by providing additional arguments, for example starting a single REMIND run in one-region mode using the settings from `config/default.cfg` and `main.gms` (useful to quickly check if your changes to the code break the model):
 
 ``` bash

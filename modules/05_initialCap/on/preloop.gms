@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -19,16 +19,17 @@ s05_inic_switch = 1;
 q05_eedemini(regi,enty)..
   v05_INIdemEn0(regi,enty)
   =e=
+  (
     !! Pathway I: FE to ppfEn.
     sum(fe2ppfEn(enty,in),
       pm_cesdata("2005",regi,in,"quantity")
     + pm_cesdata("2005",regi,in,"offset_quantity")
-  ) * s05_inic_switch
+    )
     !! Pathway II: FE via UE to ppfEn
   + sum(ue2ppfen(enty,in),
       pm_cesdata("2005",regi,in,"quantity")
     + pm_cesdata("2005",regi,in,"offset_quantity")
-    ) * s05_inic_switch
+    )
     !! Pathway III: FE via ES to ppfEn
     !! For the ES layer, we have to be consistent with conversion and share
     !! parameters when providing FE demands from CES node values.
@@ -42,9 +43,17 @@ q05_eedemini(regi,enty)..
         * pm_shFeCes("2005",regi,enty2,in,teEs2)
         )
       )
-    ) * s05_inic_switch
+    )
+    !! Pathway IV: process-based industry
+  + sum(tePrc2opmoPrc(tePrc,opmoPrc)$(p37_specFEDem("2005",regi,enty,tePrc,opmoPrc) gt 0.),
+      p37_specFEDem("2005",regi,enty,tePrc,opmoPrc)
+      *
+      pm_outflowPrcIni(regi,tePrc,opmoPrc)
+    )$(entyFeStat(enty))
+  ) * s05_inic_switch
     !! Transformation pathways that consume this enty:
-  + sum(en2en(enty,enty2,te),
+    !!(exclude tePrc, as process-based industry has its own vm_cap0 calculation below)
+  + sum(en2en(enty,enty2,te)$(NOT tePrc(te)),
       pm_cf("2005",regi,te)
     / pm_data(regi,"eta",te)
     * v05_INIcap0(regi,te)
@@ -58,7 +67,8 @@ q05_eedemini(regi,enty)..
 ;
 
 *** capacity meets demand of the produced energy:
-q05_ccapini(regi,en2en(enty,enty2,te)) ..
+!!(exclude tePrc, as process-based industry has its own vm_cap0 calculation below)
+q05_ccapini(regi,en2en(enty,enty2,te))$(NOT tePrc(te))..
     pm_cf("2005",regi,te)
   * pm_dataren(regi,"nur","1",te)
   * v05_INIcap0(regi,te)
@@ -85,10 +95,9 @@ loop(regi,
   loop(te,
 *--- Sum all historical capacities
     p05_aux_vintage_renormalization(regi,te)
-      = sum(opTimeYr2te(te,opTimeYr)$( opTime5(opTimeYr) AND (opTimeYr.val > 1) ),
+      = sum(opTimeYr2te(te,opTimeYr)$( opTime5(opTimeYr) AND (opTimeYr.val ge 1) ),
           (pm_vintage_in(regi,opTimeYr,te) * pm_omeg(regi,opTimeYr+1,te))
-        )
-        + pm_vintage_in(regi,"1",te) * pm_omeg(regi,"2",te) * 0.5;
+        );
 *--- Normalization
     if(p05_aux_vintage_renormalization(regi,te) gt 0,
       p05_vintage(regi,opTimeYr,te) = pm_vintage_in(regi,opTimeYr,te)/p05_aux_vintage_renormalization(regi,te);
@@ -111,6 +120,15 @@ solve initialcap2 using cns;
 display v05_INIdemEn0.l, v05_INIcap0.l;
 
 pm_cap0(regi,te) = v05_INIcap0.l(regi,te);
+
+$ifthen.cm_subsec_model_steel "%cm_subsec_model_steel%" == "processes"
+pm_cap0(regi,'bof') = pm_outflowPrcIni(regi,'bof','unheated') / pm_cf("2005",regi,'bof');
+pm_cap0(regi,'bf')  = pm_outflowPrcIni(regi,'bf','standard')  / pm_cf("2005",regi,'bf');
+pm_cap0(regi,'eaf') = pm_outflowPrcIni(regi,'eaf','sec')      / pm_cf("2005",regi,'eaf');
+pm_cap0(regi,'idr') = 0.;
+pm_cap0(regi,"bfcc") =0.;
+pm_cap0(regi,"idrcc") =0.;
+$endif.cm_subsec_model_steel
 
 *RP keep energy demand for the Kyoto target calibration
 pm_EN_demand_from_initialcap2(regi,enty) = v05_INIdemEn0.l(regi,enty);
@@ -217,15 +235,11 @@ loop( ttot$( ( ttot.val > 2000 ) AND ( ttot.val < 2030 ) ),
   pm_aux_capLowerLimit(te,regi,ttot) =
 ***cb early retirement for some fossil technologies
 *RP* assume no ER         (1 - vm_capEarlyReti(ttot,regi,te)) *
-  (sum(opTimeYr2te(te,opTimeYr)$(tsu2opTimeYr(ttot,opTimeYr) AND (opTimeYr.val gt 1) ),
+  (sum(opTimeYr2te(te,opTimeYr)$(tsu2opTimeYr(ttot,opTimeYr) AND (opTimeYr.val ge 1) ),
                     pm_ts(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1))
                   * pm_omeg(regi,opTimeYr+1,te)
                   * vm_deltaCap.l(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,te,"1") * p05_aux_calccapLowerLimitSwitch(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1))
               )
-*LB* half of the last time step ttot
-          +  pm_dt(ttot)/2
-           * pm_omeg(regi,"2",te)
-           * vm_deltaCap.l(ttot,regi,te,"1") * p05_aux_calccapLowerLimitSwitch(ttot)
   )
   ;
 );
@@ -283,47 +297,34 @@ loop(regi,
     p05_initial_capacity(regi,te)
     = sum(ttot$sameas(ttot,"2005"),
         sum(teSe2rlf(te,rlf),
-          sum(opTimeYr2te(te,opTimeYr)$(tsu2opTimeYr(ttot,opTimeYr) AND (opTimeYr.val gt 1) ),
+          sum(opTimeYr2te(te,opTimeYr)$(tsu2opTimeYr(ttot,opTimeYr) AND (opTimeYr.val ge 1) ),
             pm_ts(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1))
             * pm_omeg(regi,opTimeYr+1,te)
             * vm_deltaCap.lo(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,te,rlf)
           )
-*LB* add half of the last time step ttot
-          + pm_dt(ttot)/2
-          * pm_omeg(regi,"2",te)
-          * vm_deltaCap.lo(ttot,regi,te,rlf)
         )
       );
       p05_inital_output(regi,te)
       = sum(ttot$sameas(ttot,"2005"),
           pm_cf(ttot,regi,te)
           * sum(teSe2rlf(te,rlf),
-              sum(opTimeYr2te(te,opTimeYr)$(tsu2opTimeYr(ttot,opTimeYr) AND (opTimeYr.val gt 1) ),
+              sum(opTimeYr2te(te,opTimeYr)$(tsu2opTimeYr(ttot,opTimeYr) AND (opTimeYr.val ge 1) ),
                 pm_ts(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1))
                 * pm_omeg(regi,opTimeYr+1,te)
                 * vm_deltaCap.lo(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,te,rlf)
               )
-*LB* add half of the last time step ttot
-              + pm_dt(ttot)/2
-              * pm_omeg(regi,"2",te)
-              * vm_deltaCap.lo(ttot,regi,te,rlf)
             )
         );
         p05_inital_input(regi,te)
         = sum(ttot$sameas(ttot,"2005"),
             sum(teSe2rlf(teEtaIncr(te),rlf),
               pm_cf(ttot,regi,te)
-              *(sum(opTimeYr2te(te,opTimeYr)$(tsu2opTimeYr(ttot,opTimeYr) AND (opTimeYr.val gt 1) ),
+              *(sum(opTimeYr2te(te,opTimeYr)$(tsu2opTimeYr(ttot,opTimeYr) AND (opTimeYr.val ge 1) ),
                   pm_ts(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1))
                   / pm_dataeta(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,te)
                   * pm_omeg(regi,opTimeYr+1,te)
                   * vm_deltaCap.lo(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,te,rlf)
                 )
-*LB* add half of the last time step ttot
-                + (pm_dt(ttot)/2)
-                / pm_dataeta(ttot,regi,te)
-                * pm_omeg(regi,"2",te)
-                * vm_deltaCap.lo(ttot,regi,te,rlf)
               )
             )
           );
@@ -337,17 +338,12 @@ loop(regi,
           = sum(ttot$sameas(ttot,"2005"),
               sum(teSe2rlf(teEtaIncr(te),rlf),
                 pm_cf(ttot,regi,te)
-                *(sum(opTimeYr2te(te,opTimeYr)$(tsu2opTimeYr(ttot,opTimeYr) AND (opTimeYr.val gt 1) ),
+                *(sum(opTimeYr2te(te,opTimeYr)$(tsu2opTimeYr(ttot,opTimeYr) AND (opTimeYr.val ge 1) ),
                     pm_ts(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1))
                     / pm_dataeta(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,te)
                     * pm_omeg(regi,opTimeYr+1,te)
                     * vm_deltaCap.lo(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,te,rlf)
                   )
-*LB* add half of the last time step ttot
-                  +  (pm_dt(ttot)/2)
-                  / pm_dataeta(ttot,regi,te)
-                  * pm_omeg(regi,"2",te)
-                  * vm_deltaCap.lo(ttot,regi,te,rlf)
                  )
               )
             );
@@ -469,8 +465,11 @@ $endif
   );
 );
 
-* quickest phaseout in SDP (no new capacities allowed), quick phaseout in SSP1 und SSP5
-$if %cm_GDPscen% == "gdp_SDP"  p05_deltacap_res(t,regi,"biotr")$(t.val gt 2020) = 0. * p05_deltacap_res(t,regi,"biotr");
+* quickest phaseout in SDP scenarios (no new capacities allowed), quick phaseout in SSP1 und SSP5
+$if %cm_GDPscen% == "gdp_SDP" p05_deltacap_res(t,regi,"biotr")$(t.val gt 2020) = 0;
+$if %cm_GDPscen% == "gdp_SDP_EI" p05_deltacap_res(t,regi,"biotr")$(t.val gt 2020) = 0;
+$if %cm_GDPscen% == "gdp_SDP_MC" p05_deltacap_res(t,regi,"biotr")$(t.val gt 2020) = 0;
+$if %cm_GDPscen% == "gdp_SDP_RC" p05_deltacap_res(t,regi,"biotr")$(t.val gt 2020) = 0;
 $if %cm_GDPscen% == "gdp_SSP1" p05_deltacap_res(t,regi,"biotr")$(t.val gt 2020) = 0.5 * p05_deltacap_res(t,regi,"biotr");
 $if %cm_GDPscen% == "gdp_SSP5" p05_deltacap_res(t,regi,"biotr")$(t.val gt 2020) = 0.5 * p05_deltacap_res(t,regi,"biotr");
 
@@ -515,8 +514,8 @@ display pm_EN_demand_from_initialcap2, p05_emi2005_from_initialcap2;
 *** To be moved to new emiAccounting module
 * Discounting se2fe emissions from pe2se emission factors
 loop(entySe$(sameas(entySe,"segafos") OR sameas(entySe,"seliqfos") OR sameas(entySe,"sesofos")),
-  pm_emifac(ttot,regi,entyPe,entySe,te,"co2")$pm_emifac(ttot,regi,entyPe,entySe,te,"co2") = 
-    pm_emifac(ttot,regi,entyPe,entySe,te,"co2") 
+  pm_emifac(ttot,regi,entyPe,entySe,te,"co2")$pm_emifac(ttot,regi,entyPe,entySe,te,"co2") =
+    pm_emifac(ttot,regi,entyPe,entySe,te,"co2")
     - pm_eta_conv(ttot,regi,te)
       *( sum(se2fe(entySe,entyFe2,te2)$pm_emifac(ttot,regi,entySe,entyFe2,te2,"co2"), pm_emifac(ttot,regi,entySe,entyFe2,te2,"co2")*pm_eta_conv(ttot,regi,te2))/sum(se2fe(entySe,entyFe2,te2)$pm_emifac(ttot,regi,entySe,entyFe2,te2,"co2"),1)  );
 );
@@ -532,15 +531,23 @@ if (cm_startyear gt 2005,
   Execute_Loadpoint 'input_ref' pm_emifac = pm_emifac;
   Execute_Loadpoint 'input_ref' pm_EN_demand_from_initialcap2 = pm_EN_demand_from_initialcap2;
   Execute_Loadpoint 'input_ref' pm_pedem_res = pm_pedem_res;
-  Execute_Loadpoint 'input_ref' pm_inco0_t = pm_inco0_t;
   Execute_Loadpoint 'input_ref' pm_dataeta = pm_dataeta;
   Execute_Loadpoint 'input_ref' pm_data = pm_data;
   Execute_Loadpoint 'input_ref' pm_aux_capLowerLimit = pm_aux_capLowerLimit;
   Execute_Loadpoint 'input_ref' vm_deltaCap.l = vm_deltaCap.l;
   Execute_Loadpoint 'input_ref' vm_deltaCap.lo = vm_deltaCap.lo;
   Execute_Loadpoint 'input_ref' vm_deltaCap.up = vm_deltaCap.up;
+
+*** if %cm_techcosts% == "GLO", load pm_inco0_t from input_ref.gdx and overwrite values
+*** only for pc, ngt, ngcc since they have been adapted in initialCap routine above
+*** This is to avoid overwriting changes to pm_inco0_t by scenario switches
+$ifThen %cm_techcosts% == "GLO"
+  Execute_Loadpoint 'input_ref' p05_inco0_t_ref = pm_inco0_t;
+  pm_inco0_t(t,regi,te)$( teEtaIncr(te)
+                          AND (sameas(te,"pc")
+                            OR sameas(te,"ngt")
+                            OR sameas(te,"ngcc") ) ) = p05_inco0_t_ref(t,regi,te);
+$endIf
 );
 
-
 *** EOF ./modules/05_initialCap/on/preloop.gms
-

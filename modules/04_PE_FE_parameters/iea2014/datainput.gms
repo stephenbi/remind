@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -13,6 +13,21 @@ $include "./modules/04_PE_FE_parameters/iea2014/input/f04_IO_input.cs4r"
 $offdelim
 /
 ;
+
+if (smin((t,regi,pe2se(entyPe,entySe,te)), f04_IO_input(t,regi,entyPe,entySe,te)) lt 0,
+  put_utility "msg" / "**""** input data problem: f04_IO_input has negative values that are overwritten";
+  put_utility "msg" / "**""** to still allow model solving. Check input data." /;
+  loop ((t,regi,pe2se(entyPe,entySe,te)),
+    if (f04_IO_input(t,regi,entyPe,entySe,te) lt 0,
+      put_utility "msg" /
+	f04_IO_input.tn(t,regi,entyPE,entySE,te), " = ",
+        f04_IO_input(t,regi,entyPe,entySe,te):10:8;
+    );
+  );
+);
+*' overwrite negative values with 0 to allow the model to solve. In the mid-term, the input data/mapping needs to be improved to prevent negative values
+f04_IO_input(tall,regi,entyPe,entySe,te)$(f04_IO_input(tall,regi,entyPe,entySe,te) lt 0) = 0;
+
 *CG* setting historical production from wind offshore to 0 (due to the scarcity of offshore wind before 2015)
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
 f04_IO_input(tall,all_regi,"pewin","seel","windoff") = 0;
@@ -25,6 +40,21 @@ $include "./modules/04_PE_FE_parameters/iea2014/input/f04_IO_output.cs4r"
 $offdelim
 /
 ;
+
+if (smin((t,regi,pe2se(entyPe,entySe,te)), f04_IO_output(t,regi,entyPe,entySe,te)) lt 0,
+  put_utility "msg" / "**""** input data problem: f04_IO_output has negative values that are overwritten" /
+  put_utility "msg" / "**""** to still allow model solving. Check input data." /;
+  loop ((t,regi,pe2se(entyPe,entySe,te)),
+    if (f04_IO_output(t,regi,entyPe,entySe,te) lt 0,
+     put_utility "msg" /
+       f04_IO_output.tn(t,regi,entyPE,entySE, te), " = ",
+       f04_IO_output(t,regi,entyPe,entySe,te):10:8;
+    );
+  );
+);
+
+*' overwrite negative values with 0 to allow the model to solve. In the mid-term, the input data/mapping needs to be improved to prevent negative values
+f04_IO_output(tall,regi,entyPe,entySe,te)$(f04_IO_output(tall,regi,entyPe,entySe,te) lt 0) = 0;
 
 
 
@@ -249,9 +279,6 @@ p04_prodCoupleGlob("segabio","fegas","tdbiogas","seel")     = -0.05;
 p04_prodCoupleGlob("segafos","fegas","tdfosgas","seel")     = -0.05;
 p04_prodCoupleGlob("pegeo","sehe","geohe","seel")           = -0.3;
 p04_prodCoupleGlob("cco2","ico2","ccsinje","seel")          = -0.005;
-p04_prodCoupleGlob("fedie","uedit","apcardiEffT","feelt")   = -0.1;
-p04_prodCoupleGlob("fedie","uedit","apcardiEffH2T","feelt") = -0.2;
-p04_prodCoupleGlob("fedie","uedit","apcardiEffH2T","feh2t") = -0.1;
 *** use global data for coule products if regional data form IEA are 0
 loop(pc2te(enty,enty2,te,enty3),
     loop(regi,

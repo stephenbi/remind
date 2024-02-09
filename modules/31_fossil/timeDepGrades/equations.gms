@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -15,7 +15,6 @@
 *   change for example.
 *===========================================
 * Authors...: JH, NB, TAC
-* Wiki......: http://redmine.pik-potsdam.de/projects/remind-r/wiki/31_fossil
 * History...:
 *   - 2015-12-03 : Cleaning up
 *   - 2013-10-01 : Cleaning up
@@ -52,19 +51,19 @@ q31_costFuExPol(ttot,regi,peExPol(enty))$(ttot.val ge cm_startyear)..
 
 *' Two dummy equations further determine regional uranium extraction bounds. 
 *NB* the 2 dummy equations only for determining the regional uranium bounds
-q31_mc_dummy(regi,peExPol(enty))$(cm_limit_peur_scen eq 1)..
-	v31_fuExtrMC(enty,"1") 
-	=e=
-	p31_costExPoly(regi,"xi1",enty)
-	+ p31_costExPoly(regi,"xi2",enty) * v31_fuExtrCumMax(regi,enty, "1")
-	+ p31_costExPoly(regi,"xi3",enty) * v31_fuExtrCumMax(regi,enty, "1")**2
-	+ p31_costExPoly(regi,"xi4",enty) * v31_fuExtrCumMax(regi,enty, "1")**3 
+q31_mc_dummy(regi,peExPol(enty))..
+   v31_fuExtrMC(enty,"1") 
+   =e=
+   p31_costExPoly(regi,"xi1",enty)
+   + p31_costExPoly(regi,"xi2",enty) * v31_fuExtrCumMax(regi,enty, "1")
+   + p31_costExPoly(regi,"xi3",enty) * v31_fuExtrCumMax(regi,enty, "1")**2
+   + p31_costExPoly(regi,"xi4",enty) * v31_fuExtrCumMax(regi,enty, "1")**3 
 ;
 
-q31_totfuex_dummy(peExPol(enty))$(cm_limit_peur_scen eq 1)..
-	s31_max_disp_peur
-	=e=
-	sum(regi, v31_fuExtrCumMax(regi,enty, "1"))
+q31_totfuex_dummy(peExPol(enty))..
+    s31_max_disp_peur
+    =e=
+    sum(regi, v31_fuExtrCumMax(regi,enty, "1"))
 ;
 
 ***-----------------------------------------

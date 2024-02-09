@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -10,16 +10,16 @@
 ***                        IntC specific data input
 *------------------------------------------------------------------------------------
 
-***parameter p32_shCHP(all_regi,char) - upper boundary of chp electricity generation
-parameter f32_shCHP(all_regi,char)  "upper boundary of chp electricity generation"
+parameter f32_shCHP(ttot,all_regi)  "upper boundary of chp electricity generation"
 /
 $ondelim
 $include "./modules/32_power/IntC/input/f32_shCHP.cs4r"
 $offdelim
 /
 ;
-p32_shCHP(all_regi,char) = f32_shCHP(all_regi,char);
-
+p32_shCHP(ttot,all_regi) = f32_shCHP(ttot,all_regi) + 0.05;
+p32_shCHP(ttot,all_regi)$(ttot.val ge 2050) = min(p32_shCHP("2020",all_regi) + 0.15, 0.75);
+p32_shCHP(ttot,all_regi)$((ttot.val gt 2020) and (ttot.val lt 2050)) = p32_shCHP("2020",all_regi) + ((p32_shCHP("2050",all_regi) - p32_shCHP("2020",all_regi)) / 30 * (ttot.val - 2020));
 
 ***parameter p32_grid_factor(all_regi) - multiplicative factor that scales total grid requirements down in comparatively small or homogeneous regions like Japan, Europe or India
 parameter p32_grid_factor(all_regi)                "multiplicative factor that scales total grid requirements down in comparatively small or homogeneous regions like Japan, Europe or India"
@@ -81,7 +81,7 @@ $offdelim
 /
 ; 
 *** convert from USD2015/MWh to trUSD2005/TWa
-p32_flex_maxdiscount(regi,te) = p32_flex_maxdiscount(regi,te) * sm_TWa_2_MWh * sm_D2015_2_D2005 * 1e-12;
+p32_flex_maxdiscount(regi,te) = p32_flex_maxdiscount(regi,te) * sm_TWa_2_MWh * s_D2015_2_D2005 * 1e-12;
 display p32_flex_maxdiscount;
 $offtext
 

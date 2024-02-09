@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -24,7 +24,7 @@ p50_damageFuncCoefTC0(isoTC) = 0;
 p50_damageFuncCoefTC1(isoTC) = 0;
 
 *** load TC damage parameter data
-parameter f50_TCconst(isoTC,all_TCpers,all_TCspec)	"damage parameter constant"
+parameter f50_TCconst(iso,all_TCpers,all_TCspec)	"damage parameter constant"
 /
 $ondelim
 $include "./modules/50_damages/KWTCint/input/f50_TC_df_const.cs4r"
@@ -32,7 +32,7 @@ $offdelim
 /
 ;
 
-parameter f50_TCtasK(isoTC,all_TCpers,all_TCspec)	"damage parameter, linear with temperature"
+parameter f50_TCtasK(iso,all_TCpers,all_TCspec)	"damage parameter, linear with temperature"
 /
 $ondelim
 $include "./modules/50_damages/KWTCint/input/f50_TC_df_tasK.cs4r"
@@ -58,7 +58,7 @@ $ondelim
 $include "./modules/50_damages/KWTCint/input/f50_gdp.cs3r"
 $offdelim
 ;
-pm_GDPfrac(tall,iso) = f50_countryGDP(tall,iso,"gdp_SSP2EU")/1000000/sum(regi2iso(regi,iso),pm_gdp(tall,regi)/pm_shPPPMER(regi));
+pm_GDPfrac(ttot,iso)$(ttot.val ge 2005) = f50_countryGDP(ttot,iso,"gdp_SSP2EU")/1000000/sum(regi2iso(regi,iso),pm_gdp(ttot,regi)/pm_shPPPMER(regi));
 loop(ttot$(ttot.val ge 2005),
 	loop(tall$(pm_tall_2_ttot(tall,ttot)),
 		pm_GDPfrac(tall,iso) = 

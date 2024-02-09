@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -16,3 +16,6 @@ $else.regi_bio_EFTax
 $endif.regi_bio_EFTax
 
 *** EOF ./modules/21_tax/on/sets.gms
+
+*** Module specific set
+set tax_import_type_21 "p21_tau_import type" / worldPricemarkup, CO2taxmarkup, avCO2taxmarkup /

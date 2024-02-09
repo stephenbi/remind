@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -10,7 +10,7 @@
 *** is needed for calculating certain sets.
 Scalar
   sm_tmp           "temporary scalar that can be used locally"
-  sm_tmp2          "temporary scalar that can be used locally" 
+  sm_tmp2          "temporary scalar that can be used locally"
 ;
 
 ***------------------- region set    ------------------------------------------
@@ -31,15 +31,15 @@ teFinTechLearn(te) = teLearn(te) + teWACClearn(te);
 
 
 trade(enty)          = tradePe(enty) + tradeSe(enty) + tradeMacro(enty);
-emi(enty)            = emiTe(enty) + emiMac(enty) + emiExog(enty); 
+emi(enty)            = emiTe(enty) + emiMac(enty) + emiExog(enty);
 emiMacMagpie(enty)   = emiMacMagpieCH4(enty) + emiMacMagpieN2O(enty) + emiMacMagpieCO2(enty);
 emiMacExo(enty)      = emiMacExoCH4(enty) + emiMacExoN2O(enty);
 peExGrade(enty)      = peEx(enty)  - peExPol(enty);
 peRicardian(enty)    = peBio(enty) + peEx(enty);
 en2se(enty,enty2,te) = pe2se(enty,enty2,te) + se2se(enty,enty2,te);
 
-en2en(enty,enty2,te) = pe2se(enty,enty2,te) + se2se(enty,enty2,te) + se2fe(enty,enty2,te) + fe2ue(enty,enty2,te) + ccs2te(enty,enty2,te);
-te2rlf(te,rlf)       = teFe2rlf(te,rlf) + teSe2rlf(te,rlf) + teue2rlf(te,rlf) + teCCS2rlf(te,rlf) + teCCU2rlf2(te,rlf) +teNoTransform2rlf(te,rlf) + teFe2rlfH2BI(te,rlf);
+en2en(enty,enty2,te) = pe2se(enty,enty2,te) + se2se(enty,enty2,te) + se2fe(enty,enty2,te) + fe2ue(enty,enty2,te) + ccs2te(enty,enty2,te) + fe2mat(enty,enty2,te);
+te2rlf(te,rlf)       = teFe2rlf(te,rlf) + teSe2rlf(te,rlf) + teue2rlf(te,rlf) + teCCS2rlf(te,rlf) + teCCU2rlf2(te,rlf) +teNoTransform2rlf(te,rlf) + teFe2rlfH2BI(te,rlf) + teMat2rlf(te,rlf);
 ***----------------------------------------------------------------------------
 *** Fill sets that were created empty and should be filled from the mappings above
 ***----------------------------------------------------------------------------
@@ -52,7 +52,7 @@ loop(pe2se(enty,'seel',te),
 display teChp;
 
 
-loop(fe2ue(entyFe,entyUe,te), 
+loop(fe2ue(entyFe,entyUe,te),
     feForUe(entyFe) = yes;
 );
 display feForUe;
@@ -64,23 +64,18 @@ period123(ttot) = period1(ttot) + period2(ttot) + period3(ttot);
 period1234(ttot) = period1(ttot) + period2(ttot) + period3(ttot) + period4(ttot);
 
 *** calculate primary production factors (ppf)
-ppf(all_in) = ppfEn(all_in) + ppfKap(all_in);
+ppf(all_in) = ppfEn(all_in) + ppfKap(all_in) + ppfUePrc(all_in);
 *** add labour to the primary production factors (ppf)
 ppf("lab")  = YES;
 
 *** calculate intermediate production factors
 ipf(all_in) = in(all_in) - ppf(all_in);
-ipf_putty(all_in) = in_putty(all_in) - ppf_putty(all_in);
-loop ( out,
-ppfIO_putty(in)$(cesOut2cesIn(out,in)
-                  AND ipf_putty(in)
-                  AND NOT in_putty(out))          = YES;
-);
+
 *** Initialise cesLevel2cesIO and cesRev2cesIO
 loop (counter$( ord(counter) eq 1 ),
   cesLevel2cesIO(counter,"inco") = YES;   !! the root is at the lowest level
   sm_tmp = counter.val;              !! used here to track total depth in the tree
-); 
+);
 
 loop ((counter,cesOut2cesIn(out,in)),    !! loop over all out/in combinations
   if (cesLevel2cesIO(counter-1,out),    !! if out was an input on the last level
@@ -116,28 +111,8 @@ loop ((cesRev2cesIO(counter,in),cesOut2cesIn(in,in2)),
   cesOut2cesIn_below(in,in2) = YES;
 );
 
-in_below_putty(in) = NO;
-loop (ppf_putty,
-in_below_putty(in)$cesOut2cesIn_below(ppf_putty,in) = YES;
-);
-
-
 *** Aliasing of mappings is not available in all GAMS versions
 cesOut2cesIn2(out,in) = cesOut2cesIn(out,in);
-
-
-*** Computing the reference complentary factors
-
-$offOrder
-sm_tmp = 0;
-loop (cesOut2cesIn(out,in) $ in_complements(in),
-  if ( NOT ord(out) eq sm_tmp,
-  sm_tmp = ord(out);
-  loop (cesOut2cesIn2(out,in2),
-        complements_ref(in,in2) = YES;
-        );
-     );
-     );
 
 $onOrder
 *** TODO this should be reworked with Robert when revising the transport module
@@ -167,7 +142,6 @@ loop (fe2es(entyFe,esty,teEs),
 );
 
 display "ES layer sets:", ppfenFromEs, feForEs, feViaEs2ppfen;
-
 
 loop ( se2fe(entySe,entyFe,te),
 fete(entyFe,te) = YES;

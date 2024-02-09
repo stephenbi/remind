@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -9,12 +9,18 @@
 SETS
 target_type_47 "CO2 policy target type" / budget , year /
 
-emi_type_47 "emission type used in regional target" / netCO2, netCO2_noBunkers, netCO2_noLULUCF_noBunkers, netGHG, netGHG_noBunkers, netGHG_noLULUCF_noBunkers, grossEnCO2_noBunkers, netGHG_LULUCFGrassi_noBunkers /
+emi_type_47 "emission type used in regional target" 
+/ 
+  netCO2, netCO2_noBunkers, netCO2_noLULUCF_noBunkers, netCO2_LULUCFGrassi, netCO2_LULUCFGrassi_noBunkers, netCO2_LULUCFGrassi_intraRegBunker,
+  netGHG, netGHG_noBunkers, netGHG_noLULUCF_noBunkers, netGHG_LULUCFGrassi, netGHG_LULUCFGrassi_noBunkers, netGHG_LULUCFGrassi_intraRegBunker, netGHG_noLULUCF,
+  grossEnCO2_noBunkers 
+/
 
 *** Emission markets
 $ifThen.emiMkt not "%cm_emiMktTarget%" == "off" 
   regiEmiMktTarget(ext_regi)               "regions with emiMkt targets" / /
   regiANDperiodEmiMktTarget_47(ttot,ext_regi) "regions and periods with emiMkt targets" / /
+  regiEmiMktTarget2regi_47(ext_regi,all_regi)  "regions controlled by emiMkt market set to ext_regi" / / 
 $ENDIF.emiMkt
 
 *** Implicit tax/subsidy necessary to achieve quantity target for primary, secondary, final energy and/or CCS
@@ -83,6 +89,13 @@ energyQttyTargetANDGroup2enty(qttyTarget,qttyTargetGroup,all_enty) "set combinin
   FE.electricity.(seel)
   FE.heat.(sehe)
 /
+
+qttyDelayType_47 "options to define different delay rules for starting the quantity targets algorithm"
+/
+  iteration    "quantity targets are only active after certain iteration"
+  emiConv      "quantity targets are only active after emission targets defined at the carbon price modules and at the regipol modules converged"
+  emiRegiConv  "quantity targets are only active after regional emission targets achieved given deviation levels"
+/
 $endIf.cm_implicitQttyTarget
 
 $ifthen.cm_implicitPriceTarget not "%cm_implicitPriceTarget%" == "off"
@@ -105,6 +118,15 @@ pePriceScenario "scenarios for exogenous PE price targets"
   highFossilPrice
 /
 $endIf.cm_implicitPePriceTarget
+
+$ifthen.ExogDemScen NOT "%cm_exogDem_scen%" == "off"
+exogDemScen       "exogenuous FE and ES demand scenarios that can be activated by cm_exogDem_scen"
+/
+        ariadne_bal
+        ariadne_ensec
+/
+$endif.ExogDemScen
+
 ;
 
 *** Defining extra energyQttyTargetANDGroup2enty set elements

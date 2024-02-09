@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -12,13 +12,6 @@
 
 *** Fix capacity factors to the standard value from data
 vm_capFac.fx(t,regi,te) = pm_cf(t,regi,te);
-
-*** FS: for historically limited biomass production scenario in EU (cm_bioprod_histlim >= 0)
-*** to avoid infeasibilities with vintage biomass capacities
-*** allow bio techs to reduce capacity factor
-if ( cm_bioprod_histlim ge 0,
-	vm_capFac.lo(t,regi,teBioPebiolc)$(t.val ge 2030 AND regi_group("EUR_regi",regi)) = 0;
-);
 
 *** FS: if flexibility tax on, let capacity factor be endogenuously determined between 0.1 and 1 
 *** for technologies that get flexibility tax/subsity (teFlexTax)

@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -82,7 +82,7 @@ $setGlobal power  IntC               !! def = IntC
 ***---------------------    33_cdr       ----------------------------------------
 $setGlobal CDR  DAC                   !! def = DAC
 ***---------------------    35_transport    -------------------------------------
-$setGlobal transport  complex         !! def = complex
+$setGlobal transport  edge_esm         !! def = edge_esm
 ***---------------------    36_buildings    -------------------------------------
 $setglobal buildings  simple          !! def = simple
 ***---------------------    37_industry    --------------------------------------
@@ -135,19 +135,18 @@ cm_optimisticMAC     "assume optimistic Industry MAC from AR5 Ch. 10?"
 cm_CCS_cement        "CCS for cement sub-sector"
 cm_CCS_chemicals     "CCS for chemicals sub-sector"
 cm_CCS_steel         "CCS for steel sub-sector"
-c_solscen             "solar option choice"
 cm_bioenergy_SustTax    "level of the bioenergy sustainability tax in fraction of bioenergy price"
-cm_bioenergy_EF_for_tax "bioenergy emission factor that is used to derive a bioenergy tax [kgCO2/GJ]"
-cm_bioenergymaxscen   "bound on global pebiolc production excluding residues"
-cm_tradecost_bio       "choose financal tradecosts for biomass (purpose grown pebiolc)"
-cm_1stgen_phaseout    "choose if 1st generation biofuels should phase out after 2030 (vm_deltaCap=0)"
-cm_startyear          "first optimized modelling time step"
+cm_bioenergy_EF_for_tax "bioenergy emission factor that is used to derive a bioenergy tax [kgCO2 per GJ]"
+cm_maxProdBiolc         "bound on global pebiolc production including residues but excluding traditionally used biomass [EJ per yr]"
+cm_tradecostBio         "choose financal tradecosts for biomass (purpose grown pebiolc)"
+cm_1stgen_phaseout      "choose if 1st generation biofuels should phase out after 2030 (vm_deltaCap=0)"
+cm_tradbio_phaseout     "switch that allows for a faster phase out of traditional biomass"
+cm_startyear          "first optimized modelling time step [year]"
 c_start_budget        "start of GHG budget limit"
-cm_prtpScen            "pure rate of time preference standard values"
+cm_prtpScen           "pure rate of time preference standard values"
 cm_fetaxscen          "choice of final energy tax path, subsidy path and inconvenience cost path, values other than 0 make setting module 21_tax on"
 cm_multigasscen       "scenario on GHG portfolio to be included in permit trading scheme"
 cm_permittradescen    "scenario on permit trade"
-cm_limit_peur_scen    "limit total uranium production"
 cm_rentdiscoil        "[grades2poly] discount factor for the oil rent"
 cm_rentdiscoil2       "[grades2poly] discount factor for the oil rent achieved in 2100"
 cm_rentconvoil        "[grades2poly] number of years required to converge to the 2100 oil rent"
@@ -159,7 +158,6 @@ cm_rentdisccoal2      "[grades2poly] discount factor for the coal rent achieved 
 cm_rentconvcoal       "[grades2poly] number of years required to converge to the 2100 coal rent"
 c_cint_scen           "additional GHG emissions from mining fossil fuels"
 cm_so2tax_scen         "level of SO2 tax"
-cm_solwindenergyscen   "scenario for fluctuating renewables, 1 is reference, 2 is pessimistic with limits to fluctuating SE el share"
 c_techAssumptScen     "scenario for assumptions of energy technologies based on SSP scenarios, 1: SSP2 (default), 2: SSP1, 3: SSP5"
 c_ccsinjecratescen    "CCS injection rate factor, 0.5% by default yielding a 60 Mt per year IR"
 c_ccscapratescen      "CCS capture rate"
@@ -175,20 +173,14 @@ c_abtrdy              "first year in which advanced bio-energy technology are re
 c_abtcst              "scaling of the cost of advanced bio-energy technologies (no unit, 50% increase means 1.5)"
 c_budgetCO2        "carbon budget for all CO2 emissions (in GtCO2)"
 
-cm_trdcst              "parameter to scale trade export cost for gas"
-cm_trdadj              "parameter scale the adjustment cost parameter for increasing gas trade export"
-
-c_refcapbnd           "switch for fixing refinery capacities to the SSP2 levels in 2010 (if equal zero then no fixing)"
-
 cm_damages_BurkeLike_specification      "empirical specification for Burke-like damage functions"
 cm_damages_BurkeLike_persistenceTime    " persistence time in years for Burke-like damage functions"
 cm_damages_SccHorizon               "Horizon for SCC calculation. Damages cm_damagesSccHorizon years into the future are internalized."
 cm_carbonprice_temperatureLimit "not-to-exceed temperature target in degree above pre-industrial"
-cm_frac_CCS          "tax on CCS to reflect risk of leakage, formulated as fraction of carbon price"
-cm_frac_NetNegEmi    "tax on CDR to reflect risk of overshooting, formulated as fraction of carbon price"
+cm_frac_CCS          "tax on carbon transport & storage (ccsinje) to reflect risk of leakage, formulated as fraction of ccsinje O&M costs"
+cm_frac_NetNegEmi    "tax on net negative emissions to reflect risk of overshooting, formulated as fraction of carbon price"
 
 cm_DiscRateScen          "Scenario for the implicit discount rate applied to the energy efficiency capital"
-cm_noReboundEffect      "Switch for allowing a rebound effect when closing the efficiency gap (cm_DiscRateScen)"
 ;
 
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -211,7 +203,6 @@ cm_nucscen       = 2;        !! def = 2
 cm_ccapturescen  = 1;        !! def = 1
 c_bioliqscen     = 1;        !! def = 1
 c_bioh2scen      = 1;        !! def = 1
-c_solscen        = 1;        !! def = 1
 
 cm_IndCCSscen          = 1;        !! def = 1
 cm_optimisticMAC       = 0;        !! def = 0
@@ -223,12 +214,12 @@ cm_CCS_steel           = 1;        !! def = 1
 cm_bioenergy_SustTax    = 1.5;            !! def = 1.5
 cm_bioenergy_EF_for_tax = 0;              !! def = 0
 $setGlobal cm_regi_bioenergy_EFTax  glob  !! def = glob
-cm_bioenergymaxscen     = 0;              !! def = 0
-cm_tradecost_bio        = 2;              !! def = 2
+$setGlobal cm_maxProdBiolc  off           !! def = off
+cm_tradecostBio         = 0.5;            !! def = 0.5
 $setglobal cm_LU_emi_scen  SSP2           !! def = SSP2
 cm_1stgen_phaseout      = 0;              !! def = 0
 $setglobal cm_tradbio_phaseout  default   !! def = default
-cm_biolc_tech_phaseout  = 0;              !! def = 0
+cm_phaseoutBiolc        = 0;              !! def = 0
 
 $setglobal cm_POPscen  pop_SSP2  !! def = pop_SSP2
 $setglobal cm_GDPscen  gdp_SSP2  !! def = gdp_SSP2
@@ -242,7 +233,6 @@ cm_prtpScen         = 3;         !! def = 3
 cm_fetaxscen        = 3;         !! def = 3
 cm_multigasscen     = 2;         !! def = 2
 cm_permittradescen  = 1;         !! def = 1
-cm_limit_peur_scen  = 1;         !! def = 1
 $setGlobal cm_oil_scen  medOil         !! def = medOil
 $setGlobal cm_gas_scen  medGas         !! def = medGas
 $setGlobal cm_coal_scen  medCoal        !! def = medCoal
@@ -258,7 +248,6 @@ cm_rentconvcoal     = 50;        !! def 50
 
 cm_so2tax_scen        = 1;         !! def =
 c_cint_scen           = 1;         !! def = 1
-cm_solwindenergyscen  = 1;         !! def = 1
 c_techAssumptScen     = 1;         !! def = 1
 c_ccsinjecratescen    = 1;         !! def = 1
 c_ccscapratescen      = 1;         !! def = 1
@@ -275,9 +264,6 @@ c_abtcst                 = 1;      !! def = 1
 c_budgetCO2              = 1350;   !! def = 1300
 $setGlobal cm_emiMktTarget  off   !! def = off
 
-cm_trdadj            = 2;    !! def = 2.0
-cm_trdcst             = 1.5;  !! def = 1.5
-c_refcapbnd          = 0;    !! def = 0
 cm_frac_CCS          = 10;   !! def = 10
 cm_frac_NetNegEmi    = 0.5;  !! def = 0.5
 
@@ -288,7 +274,6 @@ cm_carbonprice_temperatureLimit       = 1.8;   !! def = 1.8
 
 
 cm_DiscRateScen = 0;!! def = 0
-cm_noReboundEffect = 0;
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ***                           YOU ARE IN THE WARNING ZONE (DON'T DO CHANGES HERE)
 *** --------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -307,11 +292,10 @@ $setGlobal cm_magicc_temperatureImpulseResponse  off           !! def = off
 
 $setGlobal cm_damage_DiceLike_specification  HowardNonCatastrophic   !! def = HowardNonCatastrophic
 
-$setglobal cm_CES_configuration  indu_fixed_shares-buil_simple-tran_complex-POP_pop_SSP2-GDP_gdp_SSP2-Kap_perfect-Reg_690d3718e1   !! this will be changed by start_run()
+$setglobal cm_CES_configuration  indu_fixed_shares-buil_simple-tran_edge_esm-POP_pop_SSP2-GDP_gdp_SSP2-Kap_perfect-Reg_690d3718e1   !! this will be changed by start_run()
 
 $setglobal c_CES_calibration_new_structure  0    !! def =  0
 $setglobal c_CES_calibration_iterations  10   !! def = 10
-$setglobal c_CES_calibration_iteration        1    !! def =  1
 $setglobal c_CES_calibration_write_prices  0    !! def =  0
 $setglobal cm_CES_calibration_default_prices  0.01    !! def = 0.01
 

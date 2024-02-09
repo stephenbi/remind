@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -18,7 +18,6 @@
 *###################### R SECTION START (MODULETYPES) ##########################
 $Ifi "%capitalMarket%" == "debt_limit" $include "./modules/23_capitalMarket/debt_limit/realization.gms"
 $Ifi "%capitalMarket%" == "imperfect" $include "./modules/23_capitalMarket/imperfect/realization.gms"
-$Ifi "%capitalMarket%" == "perfect" $include "./modules/23_capitalMarket/perfect/realization.gms"
 *###################### R SECTION END (MODULETYPES) ############################
 
 *** EOF ./modules/23_capitalMarket/module.gms

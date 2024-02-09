@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -24,6 +24,9 @@ pm_temperatureImpulseResponseCO2(tall,tall) = 0;
 *AL* Initialise to avoid compilation errors in presolve if variable not in input.gdx
 vm_demFeForEs.L(t,regi,entyFe,esty,teEs) = 0;
 vm_demFeForEs.L(t,regi,fe2es(entyFe,esty,teEs)) = 0.1;
+
+pm_taxCO2eq_iterationdiff(t,regi) = 0;
+pm_taxCO2eq_iterationdiff_tmp(t,regi) = 0;
 
 *------------------------------------------------------------------------------------
 ***                        calculations based on sets
@@ -108,9 +111,6 @@ Execute_Loadpoint 'input'      vm_cesIO, vm_invMacro;
 pm_gdp_gdx(ttot,regi)    = vm_cesIO.l(ttot,regi,"inco");
 p_inv_gdx(ttot,regi)     = vm_invMacro.l(ttot,regi,"kap");
 
-*** permit price initilization
-pm_pricePerm(ttot) = 0;
-
 
 *------------------------------------------------------------------------------------
 *------------------------------------------------------------------------------------
@@ -140,41 +140,16 @@ $include "./core/input/generisdata_trade.prn"
 
 !! Modify spv and storspv parameters for optimistic VRE supply assumptions
 if (cm_VRE_supply_assumptions eq 1,
-  if (fm_dataglob("learn","spv") ne 0.207,
-    abort "fm_dataglob('learn','spv') is to be modified, but changed externally";
-  else
     fm_dataglob("learn","spv") = 0.257;
-  );
-
-  if (fm_dataglob("inco0","storspv") ne 8350,
-    abort "fm_dataglob('inco0','storspv') is to be modified, but changed externally";
-  else
     fm_dataglob("inco0","storspv") = 7000;
-  );
-
-  if (fm_dataglob("incolearn","storspv") ne 5710,
-    abort "fm_dataglob('incolearn','storspv') is to be modified, but changed externally";
-  else
     fm_dataglob("incolearn","storspv") = 4240;
-  );
-
-  if (fm_dataglob("learn","storspv") ne 0.10,
-    abort "fm_dataglob('learn','storspv') is to be modified, but changed externally";
-  else
     fm_dataglob("learn","storspv") = 0.12;
-  );
-elseif cm_VRE_supply_assumptions eq 2,
-  if (fm_dataglob("incolearn","spv") ne 5060,
-    abort "fm_dataglob('incolearn','spv') is to be modified, but changed externally";
-  else
+);
+if (cm_VRE_supply_assumptions eq 2,
     fm_dataglob("incolearn","spv") = 5010;
-  );
-elseif cm_VRE_supply_assumptions eq 3,
-  if (fm_dataglob("incolearn","spv") ne 5060,
-    abort "fm_dataglob('incolearn','spv') is to be modified, but changed externally";
-  else
+);
+if (cm_VRE_supply_assumptions eq 3,
     fm_dataglob("incolearn","spv") = 4960;
-  );
 );
 
 parameter p_inco0(ttot,all_regi,all_te)     "regionalized technology costs Unit: USD$/KW"
@@ -198,6 +173,7 @@ $include "./core/input/generisdata_trade.prn"
 if (cm_nucscen eq 6,
   f_dataglob_SSP5("inco0","tnrs") = 6270; !! increased from 4000 to 6270 with the update of technology costs in REMIND 1.7 to keep the percentage increase between SSP2 and SSP5 constant
 );
+
 if (c_techAssumptScen eq 2,
                fm_dataglob(char,te) = f_dataglob_SSP1(char,te)
 );
@@ -218,10 +194,10 @@ $if not "%cm_learnRate%" == "off" parameter p_new_learnRate(all_te) / %cm_learnR
 $if not "%cm_learnRate%" == "off" fm_dataglob("learn",te)$p_new_learnRate(te)=p_new_learnRate(te);
 
 *RP* the new cost data in generisdata_tech is now in $2015. As long as the model runs in $2005, these values have first to be converted to D2005 by dividing by 1.2 downwards
-fm_dataglob("inco0",te)              = sm_D2015_2_D2005 * fm_dataglob("inco0",te);
-fm_dataglob("incolearn",te)          = sm_D2015_2_D2005 * fm_dataglob("incolearn",te);
-fm_dataglob("omv",te)                = sm_D2015_2_D2005 * fm_dataglob("omv",te);
-p_inco0(ttot,regi,te)               = sm_D2015_2_D2005 * p_inco0(ttot,regi,te);
+fm_dataglob("inco0",te)              = s_D2015_2_D2005 * fm_dataglob("inco0",te);
+fm_dataglob("incolearn",te)          = s_D2015_2_D2005 * fm_dataglob("incolearn",te);
+fm_dataglob("omv",te)                = s_D2015_2_D2005 * fm_dataglob("omv",te);
+p_inco0(ttot,regi,te)               = s_D2015_2_D2005 * p_inco0(ttot,regi,te);
 
 *RP* rescale the global CSP investment costs in REMIND: Originally we assume a SM3/12h setup, while the cost data from IEA for the short term seems rather based on a SM2/6h setup (with 40% average CF)
 *** Accordingly, also decrease long-term costs in REMIND to 0.7 of the current values
@@ -241,12 +217,10 @@ pm_ccsinjecrate(regi) = s_ccsinjecrate;
 $ifThen.c_ccsinjecrateRegi not "%c_ccsinjecrateRegi%" == "off"
 Parameter p_extRegiccsinjecrateRegi(ext_regi) "Regional CCS injection rate factor. 1/a. (extended regions)" / %c_ccsinjecrateRegi% /;
 loop((ext_regi)$p_extRegiccsinjecrateRegi(ext_regi),
-  pm_ccsinjecrate(regi)$(regi_group(ext_regi,regi)) = p_extRegiccsinjecrateRegi(ext_regi);
+  pm_ccsinjecrate(regi)$(regi_groupExt(ext_regi,regi)) = p_extRegiccsinjecrateRegi(ext_regi);
 );
-pm_ccsinjecrate(regi) = s_ccsinjecrate;
 ;
 $endIf.c_ccsinjecrateRegi
-
 
 $include "./core/input/generisdata_flexibility.prn"
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
@@ -254,13 +228,13 @@ fm_dataglob("flexibility","storwindoff")  = 1.93;
 fm_dataglob("flexibility","windoff")  = -1;
 $ENDIF.WindOff
 
-* inco0 (and incolearn) are given in $/kW (or $/(tC/a) for dac)
-* convert to REMIND units, i.e., T$/TW (or T$/(GtC/a) for dac)
-* note that factor for $/kW -> T$/TW is the same as for $/(tC/a) -> T$/(GtC/a)
-fm_dataglob("inco0",te)              = sm_DpKW_2_TDpTW       * fm_dataglob("inco0",te);
-fm_dataglob("incolearn",te)          = sm_DpKW_2_TDpTW       * fm_dataglob("incolearn",te);
+*** inco0 (and incolearn) are given in $/kW (or $/(tC/a) for ccs-related tech or $/(t/a) for process-based industry)
+*** convert to REMIND units, i.e., T$/TW (or T$/(GtC/a) for ccs-related tech or T$/(Gt/a) for process-based industry)
+*** note that factor for $/kW -> T$/TW is the same as for $/(tC/a) -> T$/(GtC/a)
+fm_dataglob("inco0",te)              = s_DpKW_2_TDpTW       * fm_dataglob("inco0",te);
+fm_dataglob("incolearn",te)          = s_DpKW_2_TDpTW       * fm_dataglob("incolearn",te);
 fm_dataglob("omv",te)                = s_DpKWa_2_TDpTWa      * fm_dataglob("omv",te);
-p_inco0(ttot,regi,te)               = sm_DpKW_2_TDpTW       * p_inco0(ttot,regi,te);
+p_inco0(ttot,regi,te)               = s_DpKW_2_TDpTW       * p_inco0(ttot,regi,te);
 
 
 table fm_dataemiglob(all_enty,all_enty,all_te,all_enty)  "read-in of emissions factors co2,cco2"
@@ -322,8 +296,6 @@ if (c_ccscapratescen eq 2,
   fm_dataemiglob("pecoal","seel","coalh2c","cco2") = 25.9;
 $ifthen "%c_SSP_forcing_adjust%" == "forcing_SSP5"
    fm_dataemiglob("pegas","seel","ngccc","co2")  = 0.1;
-   fm_dataemiglob("pegas","seel","ngccc","co2")  = 0.1;
-   fm_dataemiglob("pegas","seel","ngccc","co2")  = 0.1;
    fm_dataemiglob("pegas","seel","ngccc","cco2") = 15.2;
    fm_dataemiglob("pegas","seh2","gash2c","co2")  = 0.1;
    fm_dataemiglob("pegas","seh2","gash2c","cco2") = 15.2;
@@ -357,7 +329,6 @@ $offdelim
 /
 ;
 
-
 ***---------------------------------------------------------------------------
 *** Import and set regional data
 ***---------------------------------------------------------------------------
@@ -371,6 +342,7 @@ loop(emi2te(enty,enty2,te,enty3)$teCCS(te),
 );
 
 *** Allocate emission factors to pm_emifac
+option pm_emifac:3:3:1;
 pm_emifac(ttot,regi,enty,enty2,te,"co2")$emi2te(enty,enty2,te,"co2")   = fm_dataemiglob(enty,enty2,te,"co2");
 pm_emifac(ttot,regi,enty,enty2,te,"cco2")$emi2te(enty,enty2,te,"cco2") = fm_dataemiglob(enty,enty2,te,"cco2");
 *JeS scale N2O energy emissions to EDGAR
@@ -405,9 +377,9 @@ pm_IO_trade(ttot,regi,enty,char) = f_IO_trade(ttot,regi,enty,char) * sm_EJ_2_TWa
 
 *LB* use scaled data for export to guarantee net trade = 0 for each traded good
 loop(tradePe,
-    loop(t,
-       if(sum(regi2, pm_IO_trade(t,regi2,tradePe,"Xport")) ne 0,
-            pm_IO_trade(t,regi,tradePe,"Xport") = pm_IO_trade(t,regi,tradePe,"Xport") * sum(regi2, pm_IO_trade(t,regi2,tradePe,"Mport")) / sum(regi2, pm_IO_trade(t,regi2,tradePe,"Xport"));
+    loop(ttot,
+       if(sum(regi2, pm_IO_trade(ttot,regi2,tradePe,"Xport")) ne 0,
+            pm_IO_trade(ttot,regi,tradePe,"Xport") = pm_IO_trade(ttot,regi,tradePe,"Xport") * sum(regi2, pm_IO_trade(ttot,regi2,tradePe,"Mport")) / sum(regi2, pm_IO_trade(ttot,regi2,tradePe,"Xport"));
        );
     );
 );
@@ -489,9 +461,6 @@ f_cf(ttot,regi,"windoff") = f_cf(ttot,regi,"wind");
 $ENDIF.WindOff
 
 pm_cf(ttot,regi,te) =  f_cf(ttot,regi,te);
-*RP short-term fix: set capacity factors here by hand, because the input data procudure won't be updated in time
-pm_cf(ttot,regi,"apcardiefft") = 1;
-pm_cf(ttot,regi,"apcardieffH2t") = 1;
 ***pm_cf(ttot,regi,"h2turbVRE") = 0.15;
 pm_cf(ttot,regi,"elh2VRE") = 0.6;
 *short-term fix for new synfuel td technologies
@@ -499,18 +468,23 @@ pm_cf(ttot,regi,"tdsyngas") = 0.65;
 pm_cf(ttot,regi,"tdsynhos") = 0.6;
 pm_cf(ttot,regi,"tdsynpet") = 0.7;
 pm_cf(ttot,regi,"tdsyndie") = 0.7;
+*JD eternal short-term fix for process-based industry
+pm_cf(ttot,regi,"bf") = 0.8;
+pm_cf(ttot,regi,"bfcc") = 0.8;
+pm_cf(ttot,regi,"bof") = 0.8;
+pm_cf(ttot,regi,"idr") = 0.8;
+pm_cf(ttot,regi,"idrcc") = 0.8;
+pm_cf(ttot,regi,"eaf") = 0.8;
 
-*RP* again, short-term fix for the update of the VRE-integration hydrogen/electrolysis parameters:
-pm_cf(ttot,regi,"h2turbVRE") = 0.1;
-pm_cf(ttot,regi,"h2turb") = 0.1;
-
-*RP* phasing down the ngt cf to "peak load" cf of 0.036
+*RP* phasing down the ngt cf to "peak load" cf of 5%
+pm_cf(ttot,regi,"ngt")$(ttot.val eq 2025) = 0.9 * pm_cf(ttot,regi,"ngt");
 pm_cf(ttot,regi,"ngt")$(ttot.val eq 2030) = 0.8 * pm_cf(ttot,regi,"ngt");
 pm_cf(ttot,regi,"ngt")$(ttot.val eq 2035) = 0.7 * pm_cf(ttot,regi,"ngt");
-pm_cf(ttot,regi,"ngt")$(ttot.val eq 2040) = 0.5 * pm_cf(ttot,regi,"ngt");
-pm_cf(ttot,regi,"ngt")$(ttot.val ge 2045) = 0.4 * pm_cf(ttot,regi,"ngt");
+pm_cf(ttot,regi,"ngt")$(ttot.val ge 2040) = 0.6 * pm_cf(ttot,regi,"ngt");
 
-
+*RP* set H2 turbines to the same CF values
+pm_cf(ttot,regi,"h2turb")$(ttot.val ge 2025) = pm_cf(ttot,regi,"ngt");
+pm_cf(ttot,regi,"h2turbVRE")$(ttot.val ge 2025) = pm_cf(ttot,regi,"ngt");
 
 *** FS: set CF of additional t&d H2 for buildings and industry to t&d H2 stationary value
 pm_cf(ttot,regi,"tdh2b") = pm_cf(ttot,regi,"tdh2s");
@@ -519,28 +493,39 @@ pm_cf(ttot,regi,"tdh2i") = pm_cf(ttot,regi,"tdh2s");
 
 *SB* Region- and tech-specific early retirement rates
 *Regional*
-loop(ext_regi$pm_extRegiEarlyRetiRate(ext_regi), 
+loop(ext_regi$pm_extRegiEarlyRetiRate(ext_regi),
   pm_regiEarlyRetiRate(t,regi,te)$(regi_group(ext_regi,regi)) = pm_extRegiEarlyRetiRate(ext_regi);
 );
 *Tech-specific*
+*RP*: reduce early retirement for technologies with additional characteristics that are difficult to represent in REMIND, eg. industries built around heating/CHP plants, or flexibility from ngt plants
+pm_regiEarlyRetiRate(t,regi,"ngt")     = 0.3 * pm_regiEarlyRetiRate(t,regi,"ngt")    ; !! ngt should only be phased out very slowly, as they provide flexibility - which REMIND is not too good at capturing endogeneously
+pm_regiEarlyRetiRate(t,regi,"gaschp")  = 0.5 * pm_regiEarlyRetiRate(t,regi,"gaschp") ; !! chp should only be phased out slowly, as district heating networks/ industry uses are designed to a specific heat input
+pm_regiEarlyRetiRate(t,regi,"coalchp") = 0.5 * pm_regiEarlyRetiRate(t,regi,"coalchp"); !! chp should only be phased out slowly, as district heating networks/ industry uses are designed to a specific heat input
+pm_regiEarlyRetiRate(t,regi,"biochp")  = 0.5 * pm_regiEarlyRetiRate(t,regi,"biochp") ; !! chp should only be phased out slowly, as district heating networks/ industry uses are designed to a specific heat input
+pm_regiEarlyRetiRate(t,regi,"gashp")   = 0.5 * pm_regiEarlyRetiRate(t,regi,"gashp") ; !! chp should only be phased out slowly, as district heating networks/ industry uses are designed to a specific heat input
+pm_regiEarlyRetiRate(t,regi,"coalhp")  = 0.5 * pm_regiEarlyRetiRate(t,regi,"coalhp"); !! chp should only be phased out slowly, as district heating networks/ industry uses are designed to a specific heat input
+pm_regiEarlyRetiRate(t,regi,"biohp")   = 0.5 * pm_regiEarlyRetiRate(t,regi,"biohp") ; !! chp should only be phased out slowly, as district heating networks/ industry uses are designed to a specific heat input
+
+
 $IFTHEN.tech_earlyreti not "%c_tech_earlyreti_rate%" == "off"
-loop((ext_regi,te)$p_techEarlyRetiRate(ext_regi,te), 
+loop((ext_regi,te)$p_techEarlyRetiRate(ext_regi,te),
   pm_regiEarlyRetiRate(t,regi,te)$(regi_group(ext_regi,regi) and (t.val lt 2035 or sameas(ext_regi,"GLO"))) = p_techEarlyRetiRate(ext_regi,te);
 );
 $ENDIF.tech_earlyreti
 
-
-
 *SB* Time-dependent early retirement rates in Baseline scenarios
 $ifthen.Base_Cprice %carbonprice% == "none"
 $ifthen.Base_techpol %techpol% == "none"
-*** Allow very little early retirement future periods
-pm_regiEarlyRetiRate(t,regi,"pc")$(t.val gt 2025) = 0.01;
+*** CG: Allow no early retirement in future periods under baseline for developing countries
+loop(regi,
+if ( p_developmentState("2015",regi) < 1,
+pm_regiEarlyRetiRate(t,regi,"pc")= 0;
+);
+);
 $endif.Base_techpol
 $endif.Base_Cprice
 
 display pm_regiEarlyRetiRate;
-
 
 ***---------------------------------------------------------------------------
 *RP* calculate omegs and opTimeYr2te
@@ -606,7 +591,6 @@ loop(regi,
 putclose diagnosis_opTimeYr2te;
 
 
-
 *RP* safety check that no technology has zero life time - this should give a run-time error if omeg=0 for the first time step
 *RP* also check the previous calculation that pm_omeg is not >0 for a opTimeYr value greater than contained in opTimeYr2te
 *RP* for diagnosis, uncomment the putfile lines and you will find out which technologies have wrong inputs in generissets or generisdatadatacap
@@ -633,15 +617,6 @@ p_teAnnuity(te) = 1/p_discountedLifetime(te) ;
 
 display p_discountedLifetime, p_teAnnuity;
 
-*** read in data on electric vehicles used as bound on vm_cap.up(t,regi,"apCarElT","1")
-parameter pm_boundCapEV(tall,all_regi)     "installed capacity of electric vehicles"
-/
-$ondelim
-$include "./core/input/pm_boundCapEV.cs4r"
-$offdelim
-/
-;
-
 *** read in data on Nuclear capacities used as bound on vm_cap.fx("2015",regi,"tnrs","1"), vm_deltaCap.fx("2020",regi,"tnrs","1") and vm_deltaCap.up("2025" and "2030")
 parameter pm_NuclearConstraint(ttot,all_regi,all_te)       "parameter with the real-world capacities, construction and plans"
 /
@@ -656,8 +631,6 @@ if(pm_NuclearConstraint("2020",regi,"tnrs")<0,
     pm_NuclearConstraint("2020",regi,"tnrs")=0;
 );
 );
-
-
 
 *** read in data on CCS capacities used as bound on vm_co2CCS.up("2020",regi,"cco2","ico2","ccsinje","1")
 parameter pm_boundCapCCS(all_regi)        "installed and planed capacity of CCS"
@@ -693,7 +666,6 @@ $include "./core/input/f_emiFgas.cs4r"
 $offdelim
 /
 ;
-
 
 parameter p_abatparam_CH4(tall,all_regi,all_enty,steps)        "MAC costs for CH4 by source"
 /
@@ -768,7 +740,7 @@ $include "./core/input/f_maxProdGradeRegiWindOff.cs3r"
 $offdelim
 ;
 pm_dataren(all_regi,"maxprod",rlf,"windoff") = sm_EJ_2_TWa * f_maxProdGradeRegiWindOff(all_regi,"maxprod",rlf);
-pm_dataren(all_regi,"nur",rlf,"windoff")     = 1.25 * f_maxProdGradeRegiWindOff(all_regi,"nur",rlf);  !! increase wind offshore capacity factors by 25% as the NREL values seem to underestimate offshore capacity factors compared to historic values 
+pm_dataren(all_regi,"nur",rlf,"windoff")     = 1.25 * f_maxProdGradeRegiWindOff(all_regi,"nur",rlf);  !! increase wind offshore capacity factors by 25% as the NREL values seem to underestimate offshore capacity factors compared to historic values
 
 pm_shareWindPotentialOff2On(all_regi) = sum(rlf,f_maxProdGradeRegiWindOff(all_regi,"maxprod",rlf)$(rlf.val le 8)) /
                       sum(rlf,f_maxProdGradeRegiWindOn(all_regi,"maxprod",rlf)$(rlf.val le 8));
@@ -799,7 +771,6 @@ p_datapot(all_regi,"limitGeopot",rlf,"pesol") = f_dataRegiSolar(all_regi,"limitG
 pm_data(all_regi,"luse","spv")              = f_dataRegiSolar(all_regi,"luse","spv","1")/1000;
 
 
-
 table f_maxProdGeothermal(all_regi,char)                  "input of regionalized maximum from geothermal [EJ/a]"
 $ondelim
 $include "./core/input/f_maxProdGeothermal.cs3r"
@@ -810,7 +781,7 @@ pm_dataren(all_regi,"maxprod","1","geohdr") = 1e-5; !!minimal production potenti
 
 pm_dataren(all_regi,"maxprod","1","geohdr")$f_maxProdGeothermal(all_regi,"maxprod") = sm_EJ_2_TWa * f_maxProdGeothermal(all_regi,"maxprod");
 *** FS: temporary fix: set minimum geothermal potential across all regions to 10 PJ (still negligible even in small regions) to get rid of infeasibilities
-***pm_dataren(all_regi,"maxprod","1","geohdr")$(f_maxProdGeothermal(all_regi,"maxprod") <= 0.01) = sm_EJ_2_TWa * 0.01;
+pm_dataren(all_regi,"maxprod","1","geohdr")$(f_maxProdGeothermal(all_regi,"maxprod") <= 0.01) = sm_EJ_2_TWa * 0.01;
 
 
 *mh* set 'nur' for all non renewable technologies to '1':
@@ -821,9 +792,6 @@ display p_datapot, pm_dataren;
 ***---------------------------------------------------------------------------
 *** calculate average capacity factors for renewables in 2015
 *** --------------------------------------------------------------------------
-
-
-
 loop(regi,
   loop(teReNoBio(te),
     p_aux_capToDistr(regi,te) = pm_histCap("2015",regi,te)$(pm_histCap("2015",regi,te) gt 1e-10);
@@ -837,8 +805,8 @@ loop(regi,
       );
     );  !! teRe2rlfDetail
 
-	p_avCapFac2015(regi,te) = sum(teRe2rlfDetail(te,rlf), p_aux_capThisGrade(regi,te,rlf) * pm_dataren(regi,"nur",rlf,te) )
-								/ ( sum(teRe2rlfDetail(te,rlf), p_aux_capThisGrade(regi,te,rlf) ) + 1e-10)
+    p_avCapFac2015(regi,te) = sum(teRe2rlfDetail(te,rlf), p_aux_capThisGrade(regi,te,rlf) * pm_dataren(regi,"nur",rlf,te) )
+                                 / ( sum(teRe2rlfDetail(te,rlf), p_aux_capThisGrade(regi,te,rlf) ) + 1e-10)
   );    !! teReNoBio
 );      !! regi
 
@@ -894,7 +862,7 @@ pm_cf(t,regi,te) =
 (pm_ttot_val(t) - 2015) / 20 * pm_cf(t,regi,te)
 );
 );
-$ENDIF.WindOff 
+$ENDIF.WindOff
 
 
 *CG* set storage and grid of windoff to be the same as windon
@@ -923,9 +891,6 @@ $ifthen.VREPot_Factor not "%c_VREPot_Factor%" == "off"
     pm_dataren(regi,"maxprod",rlf,te)$( NOT( p_aux_capThisGrade(regi,te,rlf))) = pm_dataren(regi,"maxprod",rlf,te) * p_VREPot_Factor(te);
   );
 $endif.VREPot_Factor
-
-
-
 
 
 *** -----------------------------------------------------------------
@@ -966,16 +931,6 @@ $IFTHEN.WindOff %cm_wind_offshore% == "1"
 p_adj_deltacapoffset(t,regi,"windoff")= p_adj_deltacapoffset(t,regi,"wind");
 $ENDIF.WindOff
 
-***additional deltacapoffset on electric vehicles, based on latest data
-p_adj_deltacapoffset("2020",regi,"apCarElT") = 0.3 * pm_boundCapEV("2019",regi);
-p_adj_deltacapoffset("2025",regi,"apCarElT") = 2   * pm_boundCapEV("2019",regi);
-
-$ifthen.vehiclesSubsidies not "%cm_vehiclesSubsidies%" == "off"
-*** disabling electric vehicles delta cap offset for European regions as BEV installed capacity for these regions is a consequence of subsidies instead of a hard coded values.
-p_adj_deltacapoffset("2020",regi,"apCarElT")$(regi_group("EUR_regi",regi)) = 0;
-p_adj_deltacapoffset("2025",regi,"apCarElT")$(regi_group("EUR_regi",regi)) = 0;
-$endIf.vehiclesSubsidies
-
 *** share of PE2SE capacities in 2005 depends on GDP-MER
 p_adj_seed_reg(t,regi) = pm_gdp(t,regi) * 1e-4;
 
@@ -992,48 +947,54 @@ loop(ttot$(ttot.val ge 2005),
   p_adj_seed_te(ttot,regi,"coalftrec")       = 0.25;
   p_adj_seed_te(ttot,regi,"coalftcrec")      = 0.25;
   p_adj_seed_te(ttot,regi,"coaltr")          = 4.00;
-  p_adj_seed_te(ttot,regi,'apCarH2T')        = 1.00;
-  p_adj_seed_te(ttot,regi,'apCarElT')        = 1.00;
-  p_adj_seed_te(ttot,regi,'apCarDiEffT')     = 0.50;
-  p_adj_seed_te(ttot,regi,'apCarDiEffH2T')   = 0.50;
   p_adj_seed_te(ttot,regi,'dac')             = 0.25;
   p_adj_seed_te(ttot,regi,'geohe')           = 0.33;
+$ifthen.cm_subsec_model_steel "%cm_subsec_model_steel%" == "processes"
+  p_adj_seed_te(ttot,regi,"bfcc")            = 0.05;
+  p_adj_seed_te(ttot,regi,"idrcc")           = 0.05;
+$endif.cm_subsec_model_steel
 
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
-  p_adj_seed_te(ttot,regi,"windoff") = 0.5; 
-$ENDIF.WindOff 
+  p_adj_seed_te(ttot,regi,"windoff") = 0.5;
+$ENDIF.WindOff
 
 *RP: for comparison of different technologies:
 *** pm_conv_cap_2_MioLDV <- 650  # The world has slightly below 800million cars in 2005 (IEA TECO2), so with a global vm_cap of 1.2, this gives ~650
 *** ==> 1TW power plant ~ 650 million LDV
 
-  p_adj_coeff(ttot,regi,te)                = 0.2;
+  p_adj_coeff(ttot,regi,te)                = 0.25;
   p_adj_coeff(ttot,regi,"pc")              = 0.5;
-  p_adj_coeff(ttot,regi,"ngcc")            = 0.5;
+  p_adj_coeff(ttot,regi,"ngcc")            = 0.4;
   p_adj_coeff(ttot,regi,"igcc")            = 0.5;
+  p_adj_coeff(ttot,regi,"bioigcc")         = 0.55;
+  p_adj_coeff(ttot,regi,"gaschp")          = 0.4;
+  p_adj_coeff(ttot,regi,"coalchp")         = 0.5;
+  p_adj_coeff(ttot,regi,"biochp")          = 0.55;
   p_adj_coeff(ttot,regi,"coaltr")          = 0.1;
   p_adj_coeff(ttot,regi,"tnrs")            = 1.0;
   p_adj_coeff(ttot,regi,"hydro")           = 1.0;
-  p_adj_coeff(ttot,regi,teCCS)             = 1.0;
   p_adj_coeff(ttot,regi,"gasftrec")        = 0.4;
-  p_adj_coeff(ttot,regi,"gasftcrec")       = 0.8;
   p_adj_coeff(ttot,regi,"coalftrec")       = 0.6;
-  p_adj_coeff(ttot,regi,"coalftcrec")      = 0.8;
-  p_adj_coeff(ttot,regi,"spv")             = 0.08;
-  p_adj_coeff(ttot,regi,"wind")            = 0.15;
-  p_adj_coeff(ttot,regi,"geohe")            = 0.6;
+  p_adj_coeff(ttot,regi,"bioftrec")        = 0.65;
+  p_adj_coeff(ttot,regi,"gash2")           = 0.35;
+  p_adj_coeff(ttot,regi,"coalh2")          = 0.55;
+  p_adj_coeff(ttot,regi,"bioh2")           = 0.6;
+  p_adj_coeff(ttot,regi,teCCS)             = 1.0;
+  p_adj_coeff(ttot,regi,"ccsinje")         = 1.0;
+  p_adj_coeff(ttot,regi,"spv")             = 0.15;
+  p_adj_coeff(ttot,regi,"wind")            = 0.25;
+  p_adj_coeff(ttot,regi,"geohe")           = 0.6;
+$ifthen.cm_subsec_model_steel "%cm_subsec_model_steel%" == "processes"
+  p_adj_coeff(ttot,regi,"bfcc")            = 1.0;
+  p_adj_coeff(ttot,regi,"idrcc")           = 1.0;
+$endif.cm_subsec_model_steel
 
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
 
-  p_adj_coeff(ttot,regi,"windoff")         = 0.3;
+  p_adj_coeff(ttot,regi,"windoff")         = 0.35;
 $ENDIF.WindOff
 
   p_adj_coeff(ttot,regi,"dac")             = 0.8;
-  p_adj_coeff(ttot,regi,'apCarH2T')        = 1.0;
-  p_adj_coeff(ttot,regi,'apCarElT')        = 1.0;
-  p_adj_coeff(ttot,regi,'apCarDiT')        = 1.0;
-  p_adj_coeff(ttot,regi,'apCarDiEffT')     = 2.0;
-  p_adj_coeff(ttot,regi,'apCarDiEffH2T')   = 2.0;
   p_adj_coeff(ttot,regi,teGrid)            = 0.3;
   p_adj_coeff(ttot,regi,teStor)            = 0.05;
 );
@@ -1043,7 +1004,7 @@ $ifthen not "%cm_adj_seed_multiplier%" == "off"
    p_adj_seed_te(ttot,regi,te)$(p_adj_seed_multiplier(te)) = p_adj_seed_multiplier(te) * p_adj_seed_te(ttot,regi,te);
 $endif
 
-$ifthen not "%cm_adj_coeff_multiplier%" == "off"  
+$ifthen not "%cm_adj_coeff_multiplier%" == "off"
   p_adj_coeff(ttot,regi,te)$(p_adj_coeff_multiplier(te)) = p_adj_coeff_multiplier(te) * p_adj_coeff(ttot,regi,te);
 $endif
 
@@ -1060,7 +1021,7 @@ $elseif not "%cm_adj_coeff%" == "off"
   p_adj_coeff(t,regi,te)$p_new_adj_coeff(te) = p_new_adj_coeff(te);
 $endif
 
-p_adj_coeff(ttot,regi,te)            = 25 * p_adj_coeff(ttot,regi,te);  !! Rescaling all adjustment cost coefficients
+p_adj_coeff(ttot,regi,te)            = 32 * p_adj_coeff(ttot,regi,te);  !! Rescaling all adjustment cost coefficients
 
 p_adj_coeff_Orig(ttot,regi,te)    = p_adj_coeff(ttot,regi,te);
 p_adj_seed_te_Orig(ttot,regi,te)  = p_adj_seed_te(ttot,regi,te);
@@ -1124,34 +1085,12 @@ $if %cm_techcosts% == "GLO"  (1.03 + 0.03 + pm_prtp(regi) )                     
 );
 
 display p_tkpremused;
-***for those technologies, for which differentiated costs are available for 2015-2040, use those
-***$if %cm_techcosts% == "REG"   loop(teRegTechCosts(te)$(not teLearn(te)),
-***$if %cm_techcosts% == "REG"   pm_inco0_t(ttot,regi,te)$(ttot.val ge 2015 AND ttot.val lt 2040) = p_inco0(ttot,regi,te);
-***$if %cm_techcosts% == "REG"   pm_inco0_t(ttot,regi,te)$(ttot.val ge 2040) = p_inco0("2040",regi,te);
-***$if %cm_techcosts% == "REG"   );
-
-***$if %cm_techcosts% == "REG"   pm_inco0_t(ttot,regi,te)$(ttot.val ge 2015 AND ttot.val lt 2040) = p_inco0(ttot,regi,te);
 
 pm_data(regi,"inco0",te)       = (1 + p_tkpremused(regi,te) ) * pm_data(regi,"inco0",te);
 pm_data(regi,"incolearn",te)   = (1 + p_tkpremused(regi,te) ) * pm_data(regi,"incolearn",te);
 p_inco0(ttot,regi,teRegTechCosts)  = (1 + p_tkpremused(regi,teRegTechCosts) ) * p_inco0(ttot,regi,teRegTechCosts);
 *** take region average p_tkpremused for global convergence price
 fm_dataglob("inco0",te)       = (1 + sum(regi, p_tkpremused(regi,te))/sum(regi, 1)) * fm_dataglob("inco0",te);
-
-if( cm_solwindenergyscen = 2,
-    loop(te$( sameas(te,"spv") OR sameas(te,"csp") OR sameas(te,"wind") ),
-        pm_data(regi,"learn",te)     = 0.8 * pm_data(regi,"learn",te);
-    );
-    pm_data(regi,"incolearn","csp")  = 0.7 * pm_data(regi,"incolearn","csp") ;
-    pm_data(regi,"incolearn","spv")  = 0.6 * pm_data(regi,"incolearn","spv") ;
-    pm_data(regi,"incolearn","wind") = 0.3 * pm_data(regi,"incolearn","wind");
-);
-
-if( cm_solwindenergyscen = 3,
-    loop(te$( sameas(te,"spv") OR sameas(te,"csp") OR sameas(te,"wind") ),
-        pm_data(regi,"learn",te)     = 0;
-    );
-);
 
 ***calculate default floor costs for learning technologies
 pm_data(regi,"floorcost",teLearn(te)) = pm_data(regi,"inco0",te) - pm_data(regi,"incolearn",te);
@@ -1196,8 +1135,8 @@ $if %cm_techcosts% == "GLO"   pm_data(regi,"learnMult_wFC",teLearn(te))    = pm_
 $if %cm_techcosts% == "REG"   pm_data(regi,"learnMult_wFC",teLearn(te))    = pm_data(regi,"incolearn",te)/(sum(regi2,p_capCum("2015",regi2,te))**pm_data(regi,"learnExp_wFC",te));
 *** initialize spv learning curve in 2020
 $if %cm_techcosts% == "REG"   pm_data(regi,"learnMult_wFC","spv")    = pm_data(regi,"incolearn","spv")/(sum(regi2,p_capCum("2020",regi2,"spv"))**pm_data(regi,"learnExp_wFC","spv"));
-*FS initialize learning curve for most advanced technologies as defined by tech_stat = 4 in generisdata_tech.prn (with very small real-world capacities in 2020) 
-* equally for all regions based on global cumulate capacity of ccap0 and incolearn (difference between initial investment cost and floor cost) 
+*FS initialize learning curve for most advanced technologies as defined by tech_stat = 4 in generisdata_tech.prn (with very small real-world capacities in 2020)
+* equally for all regions based on global cumulate capacity of ccap0 and incolearn (difference between initial investment cost and floor cost)
 pm_data(regi,"learnMult_wFC",te)$( pm_data(regi,"tech_stat",te) eq 4 )
   = pm_data(regi,"incolearn",te)
   / ( fm_dataglob("ccap0",te)
@@ -1271,10 +1210,14 @@ table p_costMarkupAdvTech(s_statusTe,tall)              "Multiplicative investme
 $include "./core/input/p_costMarkupAdvTech.prn"
 ;
 
+*** add mark-up cost for tech_stat 4 and 5 technologies as for tech_stat 3 technologies in first years
+p_costMarkupAdvTech("4",ttot)=p_costMarkupAdvTech("3",ttot);
+p_costMarkupAdvTech("5",ttot)=p_costMarkupAdvTech("3",ttot);
+
 loop (teNoLearn(te),
   pm_inco0_t(ttot,regi,te) = pm_data(regi,"inco0",te);
   loop (ttot$( ttot.val ge 2005 AND ttot.val lt 2035 ),
-    pm_inco0_t(ttot,regi,te) 
+    pm_inco0_t(ttot,regi,te)
     = sum(s_statusTe$( s_statusTe.val eq pm_data(regi,"tech_stat",te) ),
         p_costMarkupAdvTech(s_statusTe,ttot)
       * pm_inco0_t(ttot,regi,te)
@@ -1285,10 +1228,10 @@ display pm_inco0_t;
 
 $ifthen.REG_techcosts "%cm_techcosts%" == "REG"   !! cm_techcosts
 *** for those technologies, for which differentiated costs are available for
-*** 2015-2040, use those
+*** 2015-2020, use those
 loop(te$( teNoLearn(te) AND teRegTechCosts(te) ),
   !! no value after 2020 is currently used (see convergence below)
-  pm_inco0_t(ttot,regi,te)$( ttot.val ge 2015 AND ttot.val lt 2040 )
+  pm_inco0_t(ttot,regi,te)$( ttot.val ge 2015 AND ttot.val lt 2025)
   = p_inco0(ttot,regi,te);
 
 *** linear convergence of investment costs from 2025 on for non-learning
@@ -1315,15 +1258,6 @@ loop (teNoLearn(te)$( sameas(te,"igcc") ),
   );
 );
 $endif.REG_techcosts
-
-*** rename f_datafecostsglob
-* p_esCapCost(regi,in)$f_datafecostsglob("lifetime",in)
-*                        = (f_datafecostsglob("inco0",in)
-*                          + f_datafecostsglob("omf",in) * f_datafecostsglob("lifetime",in)
-*                          ) * f_datafecostsglob("eta",in) !! from cost per UE power to cost per FE power
-*                        / (f_datafecostsglob("lifetime",in) * f_datafecostsglob("usehr",in)) !! capital costs are levelled over the yearly use
-*                        * sm_day_2_hour * sm_year_2_day    !! from $/TWh to $/TWa.
-*                        ;
 
 *** -----------------------------------------------------------------------------
 *** ------------ emission budgets and their time periods ------------------------
@@ -1385,14 +1319,16 @@ if(c_macscen eq 1,
 *pm_macCostSwitch(enty)=pm_macSwitch(enty);
 
 *** for NDC and NPi switch off landuse MACs
-$if %carbonprice% == "NDC"  pm_macSwitch(emiMacMagpie) = 0;
-$if %carbonprice% == "NPi2018"  pm_macSwitch(emiMacMagpie) = 0;
+$if %carbonprice% == "NDC"      pm_macSwitch(emiMacMagpie) = 0;
+$if %carbonprice% == "NPi"      pm_macSwitch(emiMacMagpie) = 0;
 
 *DK* LU emissions are abated in MAgPIE in coupling mode
 *** An alternative to the approach below could be to introduce a new value for c_macswitch that only deactivates the LU MACs
 $if %cm_MAgPIE_coupling% == "on"  pm_macSwitch(enty)$emiMacMagpie(enty) = 0;
 *** As long as there is hardly any CO2 LUC reduction in MAgPIE we dont need MACs in REMIND
 $if %cm_MAgPIE_coupling% == "off"  pm_macSwitch("co2luc") = 0;
+*** The tiny fraction n2ofertsom of total land use n2o can get slitghliy negative in some cases. Ignore MAC for n2ofertsom by default.
+$if %cm_MAgPIE_coupling% == "off"  pm_macSwitch("n2ofertsom") = 0;
 
 pm_macCostSwitch(enty)=pm_macSwitch(enty);
 pm_macSwitch("co2cement_process") =0 ;
@@ -1493,6 +1429,40 @@ pm_emifac(ttot,regi,"sesofos","fesos","tdfossos","co2") = p_ef_dem(regi,"fesos")
 pm_emifac(ttot,regi,"seliqfos","fehos","tdfoshos","co2") = p_ef_dem(regi,"fehos") / (sm_c_2_co2*1000*sm_EJ_2_TWa); !! GtC/TWa
 pm_emifac(ttot,regi,"seliqfos","fepet","tdfospet","co2") = p_ef_dem(regi,"fepet") / (sm_c_2_co2*1000*sm_EJ_2_TWa); !! GtC/TWa
 pm_emifac(ttot,regi,"seliqfos","fedie","tdfosdie","co2") = p_ef_dem(regi,"fedie") / (sm_c_2_co2*1000*sm_EJ_2_TWa); !! GtC/TWa
+pm_emifac(ttot,regi,"segafos","fegat","tdfosgat","co2") = p_ef_dem(regi,"fegas") / (sm_c_2_co2*1000*sm_EJ_2_TWa); !! GtC/TWa
+
+***------ Read in emission factors for process emissions in chemicals sector---
+*** calculated using IEA data on feedstocks flows and UNFCCC data on chem sector process emissions
+*** these emission factors are for the chemical industry only
+parameter f_nechem_emissionFactors(ttot,all_regi,*)  "non-energy emission factors [GtC per ZJ]"
+/
+$ondelim
+$include "./core/input/f_nechem_emissionFactors.cs4r"
+$offdelim
+/
+;
+
+pm_emifacNonEnergy(ttot,regi,"segafos","fegas","indst","co2") = f_nechem_emissionFactors(ttot,regi,"gases") / s_zj_2_twa;
+pm_emifacNonEnergy(ttot,regi,"seliqfos","fehos","indst","co2") = f_nechem_emissionFactors(ttot,regi,"liquids") / s_zj_2_twa;
+pm_emifacNonEnergy(ttot,regi,"sesofos","fesos","indst","co2") = f_nechem_emissionFactors(ttot,regi,"solids") / s_zj_2_twa;
+
+pm_emifacNonEnergy(ttot,regi,"segabio","fegas","indst","co2") = f_nechem_emissionFactors(ttot,regi,"gases") / s_zj_2_twa;
+pm_emifacNonEnergy(ttot,regi,"seliqbio","fehos","indst","co2") = f_nechem_emissionFactors(ttot,regi,"liquids") / s_zj_2_twa;
+pm_emifacNonEnergy(ttot,regi,"sesobio","fesos","indst","co2") = f_nechem_emissionFactors(ttot,regi,"solids") / s_zj_2_twa;
+
+pm_emifacNonEnergy(ttot,regi,"segasyn","fegas","indst","co2") = f_nechem_emissionFactors(ttot,regi,"gases") / s_zj_2_twa;
+pm_emifacNonEnergy(ttot,regi,"seliqsyn","fehos","indst","co2") = f_nechem_emissionFactors(ttot,regi,"liquids") / s_zj_2_twa;
+
+***------ Read in projections for incineration rates of plastic waste---
+*** "incineration rates [fraction]"
+parameter f_incinerationShares(ttot,all_regi)         "incineration rate of plastic waste"
+/
+$ondelim
+$include "./core/input/f_incinerationShares.cs4r"
+$offdelim
+/
+;
+pm_incinerationRate(ttot,all_regi)=f_incinerationShares(ttot,all_regi);
 
 *** some balances are not matching by small amounts;
 *** the differences are cancelled out here!!!
@@ -1562,9 +1532,11 @@ $offdelim
 /
 ;
 
-*** use cm_demScen for Industry and Buildings 
+*** use cm_demScen for Industry and Buildings
 *** cm_GDPscen will be used for Transport (EDGE-T) (see p29_trpdemand)
 pm_fedemand(tall,all_regi,in) = f_fedemand(tall,all_regi,"%cm_demScen%",in);
+*** data input for industry FE that is no part of the CES tree
+pm_fedemand(tall,all_regi,ppfen_no_ces_use) = f_fedemand(tall,all_regi,"%cm_demScen%",ppfen_no_ces_use);
 
 *** RCP-dependent demands in buildings (climate impact)
 $ifthen.cm_rcp_scen_build NOT "%cm_rcp_scen_build%" == "none"
@@ -1581,6 +1553,25 @@ $endif.cm_rcp_scen_build
 
 *** initialize global target deviation scalar
 sm_globalBudget_dev = 1;
+
+*' load production values from reference gdx to allow penalizing changes vs reference run in the first time step via q_changeProdStartyearCost/q21_taxrevChProdStartYear
+if (cm_startyear gt 2005,
+execute_load "input_ref.gdx", p_prodSeReference = vm_prodSe.l;
+execute_load "input_ref.gdx", p_prodFEReference = vm_prodFE.l;
+execute_load "input_ref.gdx", p_prodUeReference = v_prodUe.l;
+execute_load "input_ref.gdx", p_co2CCSReference = vm_co2CCS.l;
+);
+
+p_prodAllReference(t,regi,te) =
+    sum(pe2se(enty,enty2,te),  p_prodSeReference(t,regi,enty,enty2,te) )
+  + sum(se2se(enty,enty2,te),  p_prodSeReference(t,regi,enty,enty2,te) )
+  + sum(se2fe(enty,enty2,te),  p_prodFEReference(t,regi,enty,enty2,te) )
+  + sum(fe2ue(enty,enty2,te),  p_prodUeReference(t,regi,enty,enty2,te) )
+  + sum(ccs2te(enty,enty2,te), sum(teCCS2rlf(te,rlf), p_co2CCSReference(t,regi,enty,enty2,te,rlf) ) )
+;
+
+*' initialize vm_changeProdStartyearCost for tax calculation
+vm_changeProdStartyearCost.l(t,regi,te) = 0;
 
 *** EOF ./core/datainput.gms
 

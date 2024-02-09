@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -23,6 +23,7 @@ p51_sccParts(tall,tall2,regi)$((tall.val ge 2010) and (tall.val le 2150) and (ta
 *	* pm_consPC(tall,regi)/pm_consPC(tall2,regi) 
         * pm_damage(tall2,regi) * pm_GDPGross(tall2,regi) 
 	* p51_marginalDamageCumul(tall,tall2,regi) 
+	* pm_sccIneq(tall2,regi)
 ;
 
 p51_scc(tall,regi)$((tall.val ge 2010) and (tall.val le 2150)) = 1000 *
@@ -54,8 +55,8 @@ display p51_scc,pm_taxCO2eqSCC;
 
 
 * convergence indicator:
-p51_sccConvergenceMaxDeviation(regi) = 100 * smax(tall$(tall.val ge cm_startyear and tall.val lt 2150),abs(p51_scc(tall,regi)/max(p51_sccLastItr(tall,regi),1e-8) - 1) );
-display p51_sccConvergenceMaxDeviation;
+pm_sccConvergenceMaxDeviation = 100 * smax(regi, smax(tall$(tall.val ge cm_startyear and tall.val lt 2150),abs(p51_scc(tall,regi)/max(p51_sccLastItr(tall,regi),1e-8) - 1) ));
+display pm_sccConvergenceMaxDeviation;
 
 
 *** EOF ./modules/51_internalizeDamages/KWlikeItrCPnash/postsolve.gms

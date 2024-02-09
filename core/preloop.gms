@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -38,13 +38,14 @@ vm_co2eqMkt.l(ttot,regi,emiMkt) = 0;
 v_shfe.l(t,regi,enty,sector) = 0;
 v_shGasLiq_fe.l(t,regi,sector) = 0;  
 pm_share_CCS_CCO2(t,regi) = 0; 
-  
+pm_taxCO2eqSum(t,regi) = 0;
+
 *** overwrite default targets with gdx values if wanted
 Execute_Loadpoint 'input' p_emi_budget1_gdx = sm_budgetCO2eqGlob;
 Execute_Loadpoint 'input' vm_demPe.l = vm_demPe.l;
 Execute_Loadpoint 'input' q_balPe.m = q_balPe.m;
 Execute_Loadpoint 'input' qm_budget.m = qm_budget.m;
-Execute_Loadpoint 'input' pm_pvpRegi = pm_pvpRegi;
+Execute_Loadpoint 'input' q_co2eq.m = q_co2eq.m;
 Execute_Loadpoint 'input' pm_pvp = pm_pvp;
 Execute_Loadpoint 'input' vm_demFeSector.l = vm_demFeSector.l;
 
@@ -73,11 +74,6 @@ loop(se2fe(enty,entyFe,te)$((not sameas(enty, "seh2")) AND (not sameas(entyFe, "
 pm_vintage_in(regi,"1",te) = pm_vintage_in(regi,"1",te) * max((pm_histfegrowth(regi,entyFe)- 0.005 + 1/fm_dataglob("lifetime",te))/(1/fm_dataglob("lifetime",te)),0.1);
 pm_vintage_in(regi,"6",te) = pm_vintage_in(regi,"6",te) * max(((pm_histfegrowth(regi,entyFe)- 0.005 + 1/fm_dataglob("lifetime",te))/(1/fm_dataglob("lifetime",te)) + 1)* 0.75, 0.2);
 );
-***fe2ue technologies
-loop(fe2ue(entyFe,enty,te)$((not sameas(te, "apCarElT")) AND (not sameas(te, "apCarH2T")) AND (not sameas(te, "apTrnElT"))),
-pm_vintage_in(regi,"1",te) = pm_vintage_in(regi,"1",te) * max((pm_histfegrowth(regi,entyFe)- 0.005 + 1/fm_dataglob("lifetime",te))/(1/fm_dataglob("lifetime",te)),0.1);
-pm_vintage_in(regi,"6",te) = pm_vintage_in(regi,"6",te) * max(((pm_histfegrowth(regi,entyFe)- 0.005 + 1/fm_dataglob("lifetime",te))/(1/fm_dataglob("lifetime",te)) + 1) * 0.75,0.2);
-);
 
 *RP
 *** First adjustment of CO2 price path for peakBudget runs (set by cm_iterative_target_adj eq 9)
@@ -85,8 +81,8 @@ if(cm_iterative_target_adj eq 9,
 *** Save the original functional form of the CO2 price trajectory so values for all times can be accessed even if the peakBudgYr is shifted. 
 *** Then change to linear increasing CO2 price after peaking time 
   p_taxCO2eq_until2150(t,regi) = pm_taxCO2eq(t,regi);
-  loop(t2$(t2.val eq cm_peakBudgYr),
-    pm_taxCO2eq(t,regi)$(t.val gt cm_peakBudgYr) = p_taxCO2eq_until2150(t2,regi) + (t.val - t2.val) * cm_taxCO2inc_after_peakBudgYr * sm_DptCO2_2_TDpGtC;  !! increase by cm_taxCO2inc_after_peakBudgYr per year
+  loop(t2$(t2.val eq c_peakBudgYr),
+    pm_taxCO2eq(t,regi)$(t.val gt c_peakBudgYr) = p_taxCO2eq_until2150(t2,regi) + (t.val - t2.val) * c_taxCO2inc_after_peakBudgYr * sm_DptCO2_2_TDpGtC;  !! increase by c_taxCO2inc_after_peakBudgYr per year
   );
 );
 
@@ -146,16 +142,33 @@ $ENDIF.scaleEmiHist
 !! all net negative co2luc
 p_macBaseMagpieNegCo2(t,regi) = pm_macBaseMagpie(t,regi,"co2luc")$(pm_macBaseMagpie(t,regi,"co2luc") < 0);
 
-p_agriEmiPhaseOut(t) = 0;
-p_agriEmiPhaseOut("2025") = 0.25;
-p_agriEmiPhaseOut("2030") = 0.5;
-p_agriEmiPhaseOut("2035") = 0.75;
-p_agriEmiPhaseOut(t)$(t.val ge 2040) = 1;
+*** Rescale agricultural emissions baseline if c_agricult_base_shift switch is activated
+$IFTHEN.agricult_base_shift not "%c_agricult_base_shift%" == "off"
 
-*** Rescale non-co2 base line emissions from agriculture for all regions if c_BaselineAgriEmiRed switch is non-zero
-pm_macBaseMagpie(t,regi,enty)$(emiMac2sector(enty,"agriculture","process","ch4") OR emiMac2sector(enty,"agriculture","process","n2o"))
-  = (1-p_agriEmiPhaseOut(t)*c_BaselineAgriEmiRed)*pm_macBaseMagpie(t,regi,enty);
-  
+p_macBaseMagpie_beforeShift(t,regi,enty)=pm_macBaseMagpie(t,regi,enty);
+*** gradual phase-in of rescaling until 2040
+p_agricult_shift_phasein(t) = 0;
+p_agricult_shift_phasein("2025") = 0.25;
+p_agricult_shift_phasein("2030") = 0.5;
+p_agricult_shift_phasein("2035") = 0.75;
+p_agricult_shift_phasein(t)$(t.val ge 2040) = 1;
+
+*** rescaling all ext_regi provided by c_agricult_base_shift
+loop((ext_regi)$(p_agricult_base_shift(ext_regi)), 
+ loop(regi$regi_groupExt(ext_regi,regi),
+
+    pm_macBaseMagpie(t,regi,enty)$( emiMac2sector(enty,"agriculture","process","ch4") 
+                                    OR emiMac2sector(enty,"agriculture","process","n2o"))
+    = p_macBaseMagpie_beforeShift(t,regi,enty)
+      * (1 + p_agricult_shift_phasein(t)
+           * p_agricult_base_shift(ext_regi));
+
+  );
+);
+
+
+display pm_macBaseMagpie;
+$ENDIF.agricult_base_shift  
 
 $IFTHEN.out "%cm_debug_preloop%" == "on" 
 option limrow = 70;
@@ -169,6 +182,11 @@ $ENDIF.out
 *** load PE, SE, FE price parameters from reference gdx to have prices in time steps before cm_startyear
 if (cm_startyear gt 2005,
 execute_load "input_ref.gdx", pm_PEPrice, pm_SEPrice, pm_FEPrice;
+);
+
+*** load vm_capEarlyReti(ttot,regi,te) from reference gdx to have a reference point for q_smoothphaseoutCapEarlyReti and q_limitCapEarlyReti
+if (cm_startyear gt 2005,
+Execute_Loadpoint 'input_ref' vm_capEarlyReti.l = vm_capEarlyReti.l;
 );
 
 *** EOF ./core/preloop.gms

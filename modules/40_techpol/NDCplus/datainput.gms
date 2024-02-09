@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -20,7 +20,7 @@ p40_ElecBioBound("2030",regi) = p40_TechBound("2030",regi,"bioigcc");
 
 *** In scenarios with 2nd generation bioenergy technology phaseout,
 *** switch-off biomass capacity targets of NDC
-if (cm_biolc_tech_phaseout eq 1,
+if (cm_phaseoutBiolc eq 1,
   p40_ElecBioBound(t,regi) = 0;
   );
 

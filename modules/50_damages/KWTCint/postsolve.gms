@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -50,7 +50,7 @@ pm_damageTC(tall,isoTC)$(tall.val ge 2020 and tall.val le 2300) =
 display pm_damageTC;
 
 *combined regional damage
-pm_damage(tall,regi)$(tall.val ge 2000 and tall.val le 2300) = 
+pm_damage(tall,regi)$(tall.val ge 2005 and tall.val le 2300) = 
     pm_damageProd(tall,regi)*sum(regi2iso(regi,iso),pm_damageTC(tall,iso)*pm_GDPfrac(tall,iso))
 ;
 

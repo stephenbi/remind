@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -27,39 +27,42 @@
 *'  This means, taxes are budget-neutral: the revenue is always recycled back and still available for the economy. 
 *'  Nevertheless, the marginal of the (variable of) taxed activities is impacted by the tax which leads to the adjustment effect.
 ***---------------------------------------------------------------------------
-  q21_taxrev(t,regi)$(t.val ge max(2010,cm_startyear))..
-    vm_taxrev(t,regi)
-    =e=
-      v21_taxrevGHG(t,regi)
-    + sum(emi_sectors, v21_taxrevCO2Sector(t,regi,emi_sectors))
-    + v21_taxrevCO2luc(t,regi)
-    + v21_taxrevCCS(t,regi) 
-    + v21_taxrevNetNegEmi(t,regi)
-    + sum(entyPe, v21_taxrevPE(t,regi,entyPe))
-    + v21_taxrevFE(t,regi)
-    + sum(in, v21_taxrevCES(t,regi,in))
-    + v21_taxrevResEx(t,regi)   
-    + v21_taxrevPE2SE(t,regi)
-    + v21_taxrevTech(t,regi)
-    + v21_taxrevXport(t,regi)
-    + v21_taxrevSO2(t,regi)
-    + v21_taxrevBio(t,regi)
-    - vm_costSubsidizeLearning(t,regi)
-    + v21_implicitDiscRate(t,regi)
-    + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))  
-    + v21_taxrevFlex(t,regi)
-    + v21_taxrevBioImport(t,regi)  
+q21_taxrev(t,regi)$(t.val ge max(2010,cm_startyear))..
+  vm_taxrev(t,regi)
+  =e=
+    v21_taxrevGHG(t,regi)
+  + sum(emi_sectors, v21_taxrevCO2Sector(t,regi,emi_sectors))
+  + v21_taxrevCO2luc(t,regi)
+  + v21_taxrevCCS(t,regi) 
+  + v21_taxrevNetNegEmi(t,regi)
+  + sum(entyPe, v21_taxrevPE(t,regi,entyPe))
+  + v21_taxrevFE(t,regi)
+  + sum(in, v21_taxrevCES(t,regi,in))
+  + v21_taxrevResEx(t,regi)   
+  + v21_taxrevPE2SE(t,regi)
+  + v21_taxrevTech(t,regi)
+  + v21_taxrevXport(t,regi)
+  + v21_taxrevSO2(t,regi)
+  + v21_taxrevBio(t,regi)
+  - vm_costSubsidizeLearning(t,regi)
+  + v21_implicitDiscRate(t,regi)
+  + sum(emiMkt, v21_taxemiMkt(t,regi,emiMkt))  
+  + v21_taxrevFlex(t,regi)
+  + sum(tradePe, v21_taxrevImport(t,regi,tradePe))  
+  + v21_taxrevChProdStartYear(t,regi)
 $ifthen.cm_implicitQttyTarget not "%cm_implicitQttyTarget%" == "off"
-    + vm_taxrevimplicitQttyTargetTax(t,regi)
+  + vm_taxrevimplicitQttyTargetTax(t,regi)
 $endif.cm_implicitQttyTarget 
 $ifthen.cm_implicitPriceTarget not "%cm_implicitPriceTarget%" == "off"
-    + sum((entySe,entyFe,sector)$(entyFe2Sector(entyFe,sector)),vm_taxrevimplicitPriceTax(t,regi,entySe,entyFe,sector))
+  + sum((entySe,entyFe,sector)$(entyFe2Sector(entyFe,sector)),vm_taxrevimplicitPriceTax(t,regi,entySe,entyFe,sector))
 $endIf.cm_implicitPriceTarget
 $ifthen.cm_implicitPePriceTarget not "%cm_implicitPePriceTarget%" == "off"
-    + sum(entyPe,vm_taxrevimplicitPePriceTax(t,regi,entyPe))
+  + sum(entyPe,vm_taxrevimplicitPePriceTax(t,regi,entyPe))
 $endIf.cm_implicitPePriceTarget
+$ifthen.cm_wacc not "%cm_wacc%" == "off"
     + sum(te$(teWACClearn(te)), vm_costWACC(t,regi,te)$(p_tewacc0(regi,te) or p_countryrisk(t,regi)) )    !! revenues from cost of capital to domestic investors
- ;
+$endif.cm_wacc
+;
 
 ***---------------------------------------------------------------------------
 *'  Calculation of greenhouse gas taxes: tax rate (combination of 4 components) times ghg emissions
@@ -131,7 +134,7 @@ q21_taxrevFE(t,regi)$(t.val ge max(2010,cm_startyear))..
   v21_taxrevFE(t,regi) 
   =e=
   sum((entyFe,sector)$entyFe2Sector(entyFe,sector),
-    ( pm_tau_fe_tax(t,regi,sector,entyFe) + pm_tau_fe_sub(t,regi,sector,entyFe) ) 
+    ( p21_tau_fe_tax(t,regi,sector,entyFe) + p21_tau_fe_sub(t,regi,sector,entyFe) ) 
     * 
     sum(emiMkt$sector2emiMkt(sector,emiMkt), 
       sum(se2fe(entySe,entyFe,te),   
@@ -284,17 +287,75 @@ q21_taxrevFlex(t,regi)$( t.val ge max(2010, cm_startyear) ) ..
 
 
 ***---------------------------------------------------------------------------
-*'  FS: bioenergy import tax 
-*'  adjusts bioenergy import price, adresses sustainability concerns about the biomass world market
-*'  e.g. about negative consequences of biomass supply-chains in the Global South
+*'  FS: (PE) import tax 
+*'  can be used to place taxes on PE energy imports 
+*'  e.g. bioenergy import taxes due to sustainability concerns by importers
 ***---------------------------------------------------------------------------
 
-q21_taxrevBioImport(t,regi)..
-  v21_taxrevBioImport(t,regi)
+q21_taxrevImport(t,regi,tradePe)..
+  v21_taxrevImport(t,regi,tradePe)
   =e=
-*** import tax level * world market bioenergy price * bioenergy import
-  p21_tau_BioImport(t,regi) * pm_pvp(t,"pebiolc") / pm_pvp(t,"good") * vm_Mport(t,regi,"pebiolc")
-    - p21_taxrevBioImport0(t,regi)
+***---------------------------------------------------------------------------
+*'  import taxation: 1. "worldPricemarkup" = import tax level * world market price * tradePE import
+*'                   2. "CO2taxmarkup" = import tax level * national carbon price * imported carbon by carrier
+*'                   3. "avCO2taxmarkup" = import tax level * max( national carbon price, average carbonprice) * imported carbon by carrier
+* NOTE: In case of "CO2taxmarkup" and "avCO2taxmarkup" there is double-taxation of the CO2-content of the imported energy carrier: Once when being imported (at the border) and once when being converted to Secondary Energy (normal CO2price applied by REMIND)
+***---------------------------------------------------------------------------
+sum(tax_import_type_21, 
+ (  p21_tau_Import(t, regi, tradePe, tax_import_type_21) * pm_pvp(t,tradePe) / pm_pvp(t,"good") * vm_Mport(t,regi,tradePe) 
+    - p21_taxrevImport0(t,regi,tradePe,tax_import_type_21)
+  )$sameas(tax_import_type_21, "worldPricemarkup")
+  + 
+  (  p21_tau_Import(t, regi, tradePe, tax_import_type_21) * pm_taxCO2eqSum(t,regi) * pm_cintraw(tradePe) * vm_Mport(t,regi,tradePe) 
+  - p21_taxrevImport0(t,regi,tradePe,tax_import_type_21)
+   )$sameas(tax_import_type_21, "CO2taxmarkup")
+  + 
+  (  p21_tau_Import(t, regi, tradePe, tax_import_type_21)* max(pm_taxCO2eqSum(t,regi), sum(trade_regi, pm_taxCO2eqSum(t,trade_regi))/(card(trade_regi))) 
+  * pm_cintraw(tradePe) * vm_Mport(t,regi,tradePe) - p21_taxrevImport0(t,regi,tradePe,tax_import_type_21)
+   )$sameas(tax_import_type_21, "avCO2taxmarkup"))
 ;
+
+
+***-------------------------------------------
+*' SF: "revenue recycling of import tax to RE investments (wind, solar, storage): 
+*' investments in wind, solar and storage equal (i) investments from reference scenario with tax and no revenue recycling 
+*' plus (ii) the revenues received from the tax"
+***-------------------------------------------------------
+
+$ifthen.importtaxrc "%cm_taxrc_RE%" == "REdirect"
+
+q21_rc_tau_import_RE(t,regi)..
+  sum(en2en(enty,enty2,te)$(teVRE(te)),
+      vm_costInvTeDir(t,regi,te) + vm_costInvTeAdj(t,regi,te)$teAdj(te)
+  )
+  +
+  sum(teNoTransform,
+    vm_costInvTeDir(t,regi,teNoTransform) + vm_costInvTeAdj(t,regi,teNoTransform)$teAdj(teNoTransform)
+  )
+=g= 
+  sum(tradePE, sum(tax_import_type_21, p21_taxrevImport0(t,regi,tradePe,tax_import_type_21)))
+  +
+  sum(en2en(enty,enty2,te)$(teVRE(te)),
+      p21_ref_costInvTeDir_RE(t,regi,te) + p21_ref_costInvTeAdj_RE(t,regi,te)$teAdj(te)  !! Reference VRE investment
+  )
+  +
+  sum(teNoTransform,
+    p21_ref_costInvTeDir_RE(t,regi,teNoTransform) + p21_ref_costInvTeAdj_RE(t,regi,teNoTransform)$teAdj(teNoTransform)  !! Reference grid + storage investment
+  )
+;
+$endif.importtaxrc
+
+
+***---------------------------------------------------------------------------
+*'  Calculation of costs limiting the change compared to the reference run in cm_startyear.
+***---------------------------------------------------------------------------
+q21_taxrevChProdStartYear(t,regi)$(t.val ge max(2010,cm_startyear))..
+  v21_taxrevChProdStartYear(t,regi)
+  =e=
+  sum(en2en(enty,enty2,te), vm_changeProdStartyearCost(t,regi,te)$( (t.val gt 2005) AND (t.val eq cm_startyear ) ) )
+  - p21_taxrevChProdStartYear0(t,regi)
+;
+
+
 
 *** EOF ./modules/21_tax/on/equations.gms

@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -114,6 +114,14 @@ loop(regi,
         vm_Xport.up("2025",regi,"peoil") = ((1 + 0.02) **  15) * pm_IO_trade("2010",regi,"peoil","Xport");
         vm_Xport.up("2030",regi,"peoil") = ((1 + 0.02) **  20) * pm_IO_trade("2010",regi,"peoil","Xport");
       );
+);
+
+*** Forbid bioenergy trade if 2nd gen. bioenergy should be phased out to avoid
+*** failing markets, which may in particular happening in early years, with
+*** still non-zero production
+if (cm_phaseoutBiolc eq 1,
+   vm_Mport.up(t,regi,"pebiolc")$(t.val ge cm_startyear) = 1e-6;
+   vm_Xport.up(t,regi,"pebiolc")$(t.val ge cm_startyear) = 1e-6;
 );
 
 *** force secondary energy trade to zero

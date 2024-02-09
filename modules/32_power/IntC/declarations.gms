@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -10,7 +10,7 @@ parameters
     p32_grid_factor(all_regi)						"multiplicative factor that scales total grid requirements down in comparatively small or homogeneous regions like Japan, Europe or India"
     p32_gridexp(all_regi,all_te)					"exponent that determines how grid requirement per kW increases with market share of wind and solar. 1 means specific marginal costs increase linearly"
     p32_storexp(all_regi,all_te)					"exponent that determines how curtailment and storage requirements per kW increase with market share of wind and solar. 1 means specific marginal costs increase linearly"
-    p32_shCHP(all_regi,char)            			"upper boundary of chp electricity generation"
+    p32_shCHP(ttot,all_regi)            			"upper boundary of chp electricity generation"
     p32_factorStorage(all_regi,all_te)      		"multiplicative factor that scales total curtailment and storage requirements up or down in different regions for different technologies (e.g. down for PV in regions where high solar radiation coincides with high electricity demand)"
     f32_storageCap(char, all_te)                    "multiplicative factor between dummy seel<-->h2 technologies and storXXX technologies"
     p32_storageCap(all_te,char)                     "multiplicative factor between dummy seel<-->h2 technologies and storXXX technologies"
@@ -44,8 +44,8 @@ equations
     q32_shStor(ttot,all_regi,all_te)                "equation to calculate v32_shStor"
     q32_storloss(ttot,all_regi,all_te)              "equation to calculate vm_storloss, and - as vm_storloss determines the storage capacity - also the general integration challenges"
     q32_operatingReserve(ttot,all_regi)  			"operating reserve for necessary flexibility"
-    q32_limitSolarWind(tall,all_regi)           	"limits on fluctuating renewables, only turned on for special EMF27 scenarios"
-	q32_h2turbVREcapfromTestor(tall,all_regi)       "calculate capacities of dummy seel<--h2 technology from storXXX technologies"
+    q32_h2turbVREcapfromTestor(tall,all_regi)       "calculate capacities of dummy seel<--h2 technology from storXXX technologies"
+    q32_h2turbVREcapfromTestorUp(ttot,all_regi)     "constraint h2turbVRE hydrogen turbines to be only built together with storage capacities"
     q32_flexAdj(tall,all_regi,all_te)               "calculate flexibility used in flexibility tax for technologies with electricity input"
     q32_flexPriceShareMin                           "calculatae miniumum share of average electricity that flexible technologies can see"
     q32_flexPriceShare(tall,all_regi,all_te)        "calculate share of average electricity price that flexible technologies see"

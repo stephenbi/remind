@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -27,12 +27,5 @@ p40_NewRenBound("2030","bioftcrec")=84.5;
 p40_NewRenBound("2020","ngccc")=2;
 p40_NewRenBound("2025","ngccc")=10;
 p40_NewRenBound("2030","ngccc")=50;
-
-*cb targets from plausible extrapolation
-p40_NewRenBound("2015","apCarElT")=0.000923077;
-p40_NewRenBound("2020","apCarElT")=0.004615385;
-p40_NewRenBound("2025","apCarElT")=0.015384615;
-p40_NewRenBound("2030","apCarElT")=0.041538462;
-
 
 *** EOF ./modules/40_techpol/CombLowCandCoalPO/datainput.gms

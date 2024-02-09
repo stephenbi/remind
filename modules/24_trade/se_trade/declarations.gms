@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -16,6 +16,11 @@ p24_Mport2005correct(all_regi,all_enty)     "Correction factor to match fossil s
 
 p24_seTradeCapacity(tall,all_regi,all_regi,all_enty) "Secondary energy international yearly trade capacity potential from regi to regi2 [TWa]"
 p24_seTrade_Quantity(all_regi,all_regi,all_enty)      "Maximum import quantity in import scenarios with fixed quantities [TWa]"
+
+
+$IFTHEN.trade_SE_exog not "%cm_trade_SE_exog%" == "off"
+p24_trade_exog(ttot,ttot,ext_regi,ext_regi,all_enty)   "parameter to define exogenous SE trade trajectories [EJ/yr]" / %cm_trade_SE_exog% /
+$ENDIF.trade_SE_exog
 
 p24_MportsRegi(tall,all_regi,all_regi,tradeSe)      "Mports to regi from regi2, assuming that trade is distributed uniformetly according existent capacities defined at p24_seTradeCapacity [TWa]"
 p24_XportsRegi(tall,all_regi,all_regi,tradeSe)      "Exports from regi to regi2. Defined in the postsolve as a result of p24_MportsRegi calculation [TWa]"

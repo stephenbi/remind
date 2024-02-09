@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -135,6 +135,7 @@ Mix1
 Mix2
 Mix3
 Mix4
+PhOP
 ECEMF_HighEl_HighEff
 ECEMF_HighEl_ModEff
 ECEMF_HighEl_LifestCha
@@ -144,14 +145,13 @@ ECEMF_HighH2_ModEff
 NAV_act
 NAV_tec
 NAV_ele
+NAV_lce
 NAV_all
+CAMP_lscWeak
+CAMP_lscStrong
 /
 
 EDGE_scenario(EDGE_scenario_all) "Selected EDGE-T scenario"
-
-*** sets for the reporting, to be consistent with *complex* realisation
-FE_Transp_fety35(all_enty) "FEs used in the transport module"  / fepet, fedie, feh2t, feelt, fegat/
-FE_Elec_fety35(all_enty)   "FE electricity sets (should be moved to core/sets asap)"  / feels, feelt /
 
 fe_transport_liquids_dyn35(all_enty) "liquids used by the transport module"
 /

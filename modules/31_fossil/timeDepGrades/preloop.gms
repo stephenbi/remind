@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -15,7 +15,6 @@
 *   change for example.
 *===========================================
 * Authors...: JH, NB, TAC, CB, SB
-* Wiki......: http://redmine.pik-potsdam.de/projects/remind-r/wiki/31_fossil
 * History...:
 *   - 2020-04-15 : Created moinput functions for input data handling, including region-specific constraints
 *                  previously in the GAMS code. Data aggregated to H12 regions.
@@ -144,14 +143,13 @@ $ENDIF.mofex
 ***--------------------------------------
 v31_fuExtrCumMax.l(regi,peExPol(enty), "1")=0.01;
 model m31_uran_bound_dummy /q31_mc_dummy, q31_totfuex_dummy/;
- if(cm_limit_peur_scen eq 1,
+
 *** Small CNS model to initiate regional bounds on uranium extraction
      v31_fuExtrCumMax.l(regi,peExPol(enty), "1")=0.01;
  solve m31_uran_bound_dummy using cns;
 
 *AJS* use parameter to save the result of the CNS model
      p31_fuExtrCumMaxBound(regi,"peur", "1") = v31_fuExtrCumMax.l(regi,"peur", "1");
-);
 
 
 *** EOF ./modules/31_fossil/timeDepGrades/preloop.gms

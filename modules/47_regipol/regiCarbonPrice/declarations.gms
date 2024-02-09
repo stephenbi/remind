@@ -1,4 +1,4 @@
-*** |  (C) 2006-2022 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -40,14 +40,13 @@ Parameter
 *** Parameters necessary to calculate current emission target deviations
   pm_emiMktCurrent(ttot,ttot2,ext_regi,emiMktExt)    "previous iteration region emissions (from year ttot to ttot2 for budget) [GtCO2 or GtCO2eq]"
   p47_emiMktCurrent_iter(iteration,ttot,ttot2,ext_regi,emiMktExt) "parameter to save pm_emiMktCurrent across iterations  [GtCO2 or GtCO2eq]"
-  pm_emiMktRefYear(ttot,ttot2,ext_regi,emiMktExt)    "emissions in reference year 2015, used for calculating target deviation of year targets [GtCO2 or GtCO2eq]"
-  pm_emiMktTarget_dev_iter(iteration, ttot,ttot2,ext_regi,emiMktExt) "parameter to save pm_emiMktTarget_dev across iterations [%]"
+  pm_emiMktRefYear(ttot,ttot2,ext_regi,emiMktExt)    "emissions in reference year 2005, used for calculating target deviation of year targets [GtCO2 or GtCO2eq]"
+  pm_emiMktTarget_dev_iter(iteration, ttot,ttot2,ext_regi,emiMktExt) "parameter to save pm_emiMktTarget_dev across iterations (1 is 100%)"
 
 *** Parameters necessary to calculate the emission tax rescaling factor
-  p47_factorRescaleSlope(ttot,ttot2,ext_regi,emiMktExt)     "auxiliar parameter to save the slope corresponding to the observed mitigation derivative regarding to co2tax level changes from the two previous iterations [#]"
+  p47_factorRescaleSlope(ttot,ttot2,ext_regi,emiMktExt)     "auxiliary parameter to save the slope corresponding to the observed mitigation derivative regarding to co2tax level changes from the two previous iterations [#]"
   p47_factorRescaleSlope_iter(iteration,ttot,ttot2,ext_regi,emiMktExt) "parameter to save mitigation curve slope across iterations [#]"
-  p47_factorRescaleIntersect(ttot,ttot2,ext_regi,emiMktExt) "auxiliar parameter to save the intersect value of the linear projection of previous iterations mitigation levels when compared to relative price difference [#]" 
-  p47_factorRescaleIntersect_iter(iteration,ttot,ttot2,ext_regi,emiMktExt) "parameter to save mitigation curve intersect across iterations [#]"
+  p47_slopeReferenceIteration_iter(iteration,ttot,ext_regi)    "auxiliary parameter to store reference iteration used for calculating slope of current mititgation cost [#]"
   pm_factorRescaleemiMktCO2Tax(ttot,ttot2,ext_regi,emiMktExt) "multiplicative tax rescale factor that rescales emiMkt carbon price from iteration to iteration to reach regipol targets [%]"
   p47_factorRescaleemiMktCO2Tax_iter(iteration,ttot,ttot2,ext_regi,emiMktExt) "parameter to save rescale factor across iterations for debugging purposes [%]"
 
@@ -55,11 +54,13 @@ Parameter
   p47_targetConverged(ttot,ext_regi)                 "boolean to store if emission target has converged [0 or 1]"
   p47_targetConverged_iter(iteration,ttot,ext_regi)  "parameter to save p47_targetConverged across iterations [0 or 1]"
   p47_allTargetsConverged(ext_regi)                  "boolean to store if all emission targets converged at least once [0 or 1]"
+  p47_allTargetsConverged_iter(iteration,ext_regi)   "parameter to save p47_allTargetsConverged across iterations [0 or 1]"
   p47_firstTargetYear(ext_regi)                      "first year with a pre defined policy emission target in the region [year]"
   p47_lastTargetYear(ext_regi)                       "last year with a pre defined policy emission target in the region [year]"
-  p47_currentConvergencePeriod(ext_regi)             "auxiliar parameter to store the current target year being executed by the convergence algorithm [year]"
-  p47_nextConvergencePeriod(ext_regi)                "auxiliar parameter to store the next target year being executed by the convergence algorithm [year]"
-  p47_averagetaxemiMkt(ttot,all_regi)                "auxiliar parameter to store the weighted average convergence price between the current target terminal year and the next target year. Only applied for target years different than p47_lastTargetYear"
+  p47_currentConvergencePeriod(ext_regi)             "auxiliary parameter to store the current target year being executed by the convergence algorithm [year]"
+  p47_currentConvergence_iter(iteration,ttot,ext_regi) "auxiliary parameter to store if carbon price adjustment in response to a specific emission target is being executed by the convergence algorithm in the specific REMIND iteration [0 or 1]"
+  p47_nextConvergencePeriod(ext_regi)                "auxiliary parameter to store the next target year being executed by the convergence algorithm [year]"
+  p47_averagetaxemiMkt(ttot,all_regi)                "auxiliary parameter to store the weighted average convergence price between the current target terminal year and the next target year. Only applied for target years different than p47_lastTargetYear"
 
 *** output parameters
   p47_taxemiMkt_AggEmi(ttot,all_regi)                "CO2eq regional aggregated emission tax (aggregated by emissions)"
@@ -70,12 +71,14 @@ Parameter
   p47_taxCO2eq_SectorAggFE(ttot,all_regi,sector)     "CO2eq global and regional aggregated sectoral emission taxes (aggregated by final energy)"
 ;
 
-$ifThen.prioRescaleFactor not "%cm_prioRescaleFactor%" == "off" 
-Parameter
-  s47_prioRescaleFactor   "factor to prioritize short term targets in the initial iterations (and vice versa latter) [0..1]" / %cm_prioRescaleFactor% /
-; 
-$endIf.prioRescaleFactor
- 
+*' RP: improve formatting of output: always have the iteration separate to allow easy comparison over iterations.
+*' For non-iteration values show time and regi down, and the other two sets to the right
+option pm_emiMktTarget:3:3:3; !! ensure bett
+option pm_factorRescaleemiMktCO2Tax:3:3:1;
+option pm_emiMktCurrent:3:3:1;
+option pm_emiMktRefYear:3:3:1;
+option pm_emiMktTarget_dev_iter:3:1:4;
+
 $endIf.emiMkt
 
 ***---------------------------------------------------------------------------
@@ -89,10 +92,10 @@ Parameter
   p47_implicitQttyTargetTax_prevIter(ttot,all_regi,qttyTarget,qttyTargetGroup) "previous iteration quantity target tax"
   p47_implicitQttyTargetTax0(ttot,all_regi)                                    "previous iteration quantity target tax revenue"
 
-  p47_implicitQttyTargetTax_iter(iteration,ttot,all_regi,qttyTarget,qttyTargetGroup)        "tax/subsidy level necessary to achieve a quantity target per iteration"
-  pm_implicitQttyTarget_dev(ttot,ext_regi,qttyTarget,qttyTargetGroup)                 "deviation of current iteration quantity target from target"
-  p47_implicitQttyTarget_dev_iter(iteration,ttot,ext_regi,qttyTarget,qttyTargetGroup) "parameter to save pm_implicitQttyTarget_dev across iterations"
-  p47_implicitQttyTargetTaxRescale_iter(iteration,ttot,ext_regi,qttyTarget,qttyTargetGroup) "rescale factor for current implicit quantity target tax per iteration"    
+  p47_implicitQttyTargetTax_iter(iteration,ttot,all_regi,qttyTarget,qttyTargetGroup)  "tax/subsidy level to achieve a quantity target that the model saw in a given iteration"
+  pm_implicitQttyTarget_dev(ttot,ext_regi,qttyTarget,qttyTargetGroup)                 "deviation of current iteration quantity target from target - relative for total targets, absolute (= share points) for share targets"
+  p47_implicitQttyTarget_dev_iter(iteration,ttot,ext_regi,qttyTarget,qttyTargetGroup) "deviation of current iteration quantity from target after the given iteration"
+  p47_implicitQttyTargetTaxRescale_iter(iteration,ttot,ext_regi,qttyTarget,qttyTargetGroup) "rescale factor for current implicit quantity target tax after the given iteration"    
   p47_implicitQttyTargetCurrent_iter(iteration,ttot,ext_regi,qttyTarget,qttyTargetGroup)    "current iteration total value for an specific quantity target per iteration"   
 
   pm_implicitQttyTarget(ttot,ext_regi,taxType,targetType,qttyTarget,qttyTargetGroup)  "quantity target [absolute: TWa or GtC; or percentage: 0.1]"  / %cm_implicitQttyTarget% /
@@ -100,7 +103,29 @@ Parameter
   pm_implicitQttyTarget_isLimited(iteration,qttyTarget,qttyTargetGroup)  "1 (one) if there is a hard bound on the model that does not allow the tax to change further the quantity"
 
   p47_implicitQttyTarget_initialYear(ext_regi,taxType,targetType,qttyTarget,qttyTargetGroup) "initial year of quantity target for a given region [year]"
+
+  p47_implicitQttyTargetReferenceIteration(ext_regi)  "first iteration that the quantity target scaling algorithm is active"
+  p47_implicitQttyTargetIterationCount(ext_regi)      "number of iterations that the quantity target scaling algorithm is active"
+
+$ifthen.cm_implicitQttyTarget_delay not "%cm_implicitQttyTarget_delay%" == "off"
+  p47_implicitQttyTarget_delay(qttyDelayType_47)  "delay the start of the quantity target algorithm either by a given number of iteration or to after achieving emission targets convergence" / %cm_implicitQttyTarget_delay% /
+$endIf.cm_implicitQttyTarget_delay
+
+  p47_implicitQttyTargetActive_iter(iteration,ext_regi) "auxiliary parameter to store the iterations that the quantity target should be active"
 ;
+
+*' RP: improve formatting of output: always have the iteration separate to allow easy comparison over iterations.
+*' For non-iteration values show time and regi down, and the other two sets to the right
+option p47_implicitQttyTarget_dev_iter:3:1:4;  
+option p47_implicitQttyTargetTaxRescale_iter:3:1:4;
+option p47_implicitQttyTargetTax_iter:3:1:4;
+option p47_implicitQttyTargetCurrent_iter:3:1:4;
+option p47_implicitQttyTargetCurrent:3:2:2;
+option pm_implicitQttyTarget:3:2:4;
+option p47_implicitQttyTargetTax_prevIter:3:2:2;
+option pm_implicitQttyTarget_dev:3:2:2;
+option p47_implicitQttyTargetTax:3:2:2;
+option p47_implicitQttyTargetTaxRescale:3:2:2;
 
 Equations
   q47_implicitQttyTargetTax(ttot,all_regi)  "implicit quantity target tax (PE, SE, FE and/or FE CCS) to represent non CO2-price-driven policies or exogenously defined quantity constraint scenarios"
