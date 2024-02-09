@@ -52,22 +52,102 @@ q_costInv(t,regi)..
 
 
 *** investment costs
-q_costInvTeDir(t,regi,te)..
-  v_costInvTeDir(t,regi,te)
+q_costInvTeDir(ttot,regi,te)..
+  v_costInvTeDir(ttot,regi,te)
   =e=
-  vm_costTeCapital(t,regi,te) * sum(te2rlf(te,rlf), vm_deltaCap(t,regi,te,rlf) )
+    vm_costTeCapital(ttot,regi,te) * sum(te2rlf(te,rlf), vm_deltaCap(ttot,regi,te,rlf) )
 ;
 
 
 *RP* 2011-12-01 remove global adjustment costs to decrease runtime, only keep regional adjustment costs. Maybe change in the future.
-v_adjFactorGlob.fx(t,regi,te) = 0;
+v_adjFactorGlob.fx(ttot,regi,te) = 0;
 
 *RP* 2010-05-10 adjustment costs
-q_costInvTeAdj(t,regi,teAdj)..
-  v_costInvTeAdj(t,regi,teAdj)
+q_costInvTeAdj(ttot,regi,teAdj)..
+  v_costInvTeAdj(ttot,regi,teAdj)
   =e=
-  vm_costTeCapital(t,regi,teAdj) * ( (p_adj_coeff(t,regi,teAdj) * v_adjFactor(t,regi,teAdj)) + (p_adj_coeff_glob(teAdj) * v_adjFactorGlob(t,regi,teAdj) ) )
+  vm_costTeCapital(ttot,regi,teAdj) * ( (p_adj_coeff(ttot,regi,teAdj) * v_adjFactor(ttot,regi,teAdj)) + (p_adj_coeff_glob(teAdj) * v_adjFactorGlob(ttot,regi,teAdj) ) )
 ;
+
+
+$ifthen.wacc not %cm_wacc% == "off"
+*SB* 2022-12-06 initial WACC implementation
+*** Will most likely be moved to postsolve
+*** WACC learning along financial experience curve
+q_teWACC(ttot,regi,teWACClearn)$(ttot.val ge cm_startyear and p_tewacc0(regi,teWACClearn))..
+  vm_teWACC(ttot,regi,teWACClearn)
+  =e=
+  (
+    p_tewacc0(regi,teWACClearn)                  !! technology-specific WACC in initial period (2020)
+  * ((vm_capCum(ttot,regi,teWACClearn) 
+    )
+  / (vm_capCum("2020",regi,teWACClearn)           !! Cumulative capacity in period of initial data
+  ))
+  ** p_wacc_learn(regi,teWACClearn)               !! WACC learning rate for each doubling of cumulative capacity 
+  )
+;
+
+*** WACC before 2005 fixed to 2005 level
+q_teWACC0(ttot,regi,teWACClearn)$(ttot.val lt 2005 and p_tewacc0(regi,teWACClearn))..
+  vm_teWACC(ttot,regi,teWACClearn) 
+  =e= 
+  vm_teWACC("2005",regi,teWACClearn)
+  ;
+
+
+*** Annuitized cost of capital for all unamortized capacity 
+q_costWACC(ttot,regi,teWACClearn)$(ttot.val ge cm_startyear and (p_tewacc0(regi,teWACClearn) or p_countryrisk(ttot,regi)))..
+  vm_costWACC(ttot,regi,teWACClearn)
+  =e=
+  sum(te2rlf(teWACClearn,rlf),
+      sum(opTimeYr2te(teWACClearn,opTimeYr)$(tsu2opTimeYr(ttot,opTimeYr) AND (opTimeYr.val gt 1) ),   !! Sum of unamortized investments in present period
+        pm_ts(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1))                                                !! Timestep length
+        * (v_costInvTeDir(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,teWACClearn)                     !! Average annual investment in each timestep 
+          + v_costInvTeAdj(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,teWACClearn))                   !! Annual adjustment costs at time of investment                                     
+        * (                                                                                 
+          (vm_teWACC(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,teWACClearn)              !! Tech-specific WACC at time of investment
+           + p_countryrisk(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi)                    !! Country risk markup at time of investment
+          ) 
+        / (1 - (1 + (vm_teWACC(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi,teWACClearn)     !! Annuity factor (sum of all discount factors)
+            + p_countryrisk(ttot-(pm_tsu2opTimeYr(ttot,opTimeYr)-1),regi) ) ) 
+             ** (-pm_data(regi,"lifetime",teWACClearn)) )                                    !! Amortization period (technical lifetime)
+          - (1 / pm_data(regi,"lifetime",teWACClearn))                                       !! Subtract annual principal payment
+        )
+  )
+)
+;
+
+*** Attempt to implement debt amortization schedule distinct from technical lifetime (not functional)
+* q_costWACC(ttot,regi,teWACClearn)$(ttot.val ge 2005 and (p_tewacc0(regi,teWACClearn) or p_countryrisk(ttot,regi)))..
+*   vm_costWACC(ttot,regi,teWACClearn)
+*   =e=
+* * (1 - vm_capEarlyReti(ttot,regi,teWACClearn))                                                      !! early retired capacity in present period
+*   sum(te2rlf(teWACClearn,rlf),                                                                      !! Sum all operating capacity in present period
+*     sum(tsu2opTimeYr(ttot2,opTimeYr)$(ttot2.val ge (ttot.val - p_wacc_amort(regi,teWACClearn)) and ttot2.val lt ttot.val and opTimeYr.val gt 1), 
+*         (pm_ts(ttot-(pm_tsu2opTimeYr(ttot2,opTimeYr)-1)) 
+*           * vm_deltaCap(ttot-(pm_tsu2opTimeYr(ttot2,opTimeYr)-1),regi,teWACClearn,rlf)
+*           +  ( pm_dt(ttot) / 2 
+*               * vm_deltaCap(ttot,regi,teWACClearn,rlf)
+*              )
+*        )
+*        * (vm_costTeCapital.l(ttot-(pm_tsu2opTimeYr(ttot2,opTimeYr)-1),regi,teWACClearn)   !! Investment cost per unit at time of installation
+*        * (1 + (p_adj_coeff(ttot-(pm_tsu2opTimeYr(ttot2,opTimeYr)-1),regi,teWACClearn)   !! Adjustment costs at time of investment
+*             * v_adjFactor(ttot-(pm_tsu2opTimeYr(ttot2,opTimeYr)-1),regi,teWACClearn)) 
+*             + (p_adj_coeff_glob(teWACClearn) * v_adjFactorGlob(ttot-(pm_tsu2opTimeYr(ttot2,opTimeYr)-1),regi,teWACClearn) ) 
+*           )$(teAdj(teWACClearn) and p_adj_coeff(ttot-(pm_tsu2opTimeYr(ttot2,opTimeYr)-1),regi,teWACClearn))
+*           )
+*         * (                                                                              !! Annuity factor (sum of all discount factors)
+*         (vm_teWACC(ttot-(pm_tsu2opTimeYr(ttot2,opTimeYr)-1),regi,teWACClearn)            !! Tech-specific WACC at time of investment
+*             + p_countryrisk(ttot-(pm_tsu2opTimeYr(ttot2,opTimeYr)-1),regi) )             !! Country-specific WACC at time of investment
+*         / (1 - (1 + (vm_teWACC(ttot-(pm_tsu2opTimeYr(ttot2,opTimeYr)-1),regi,teWACClearn)  
+*             + p_countryrisk(ttot-(pm_tsu2opTimeYr(ttot2,opTimeYr)-1),regi) ) ) 
+*              ** (-p_wacc_amort(regi,teWACClearn)) )                                      !! Amortization period
+*           - 1)
+*   )
+* )
+* ;
+
+$endif.wacc
 
 ***---------------------------------------------------------------------------
 *' Operation and maintenance costs from maintenance of existing facilities according to their capacity and
@@ -92,6 +172,7 @@ q_costOM(t,regi)..
             )
   )
   + vm_omcosts_cdr(t,regi)
+  + sum(teWACClearn, vm_costWACC(t,regi,teWACClearn)$(p_countryrisk(t,regi) or p_tewacc0(regi,teWACClearn)) )$(not sameas("%cm_wacc%","off"))   !! WACC burden of all unamortized capacity
 ;
 
 ***---------------------------------------------------------------------------
@@ -366,23 +447,40 @@ $ENDIF.WindOff
 ***---------------------------------------------------------------------------
 *' Calculation of cumulated capacities (learning technologies only):
 ***---------------------------------------------------------------------------
-qm_deltaCapCumNet(ttot,regi,teLearn)$(ord(ttot) lt card(ttot) AND pm_ttot_val(ttot+1) ge max(2010, cm_startyear))..
-  vm_capCum(ttot+1,regi,teLearn)
+qm_deltaCapCumNet(ttot,regi,teFinTechLearn)$(ord(ttot) lt card(ttot) AND pm_ttot_val(ttot+1) ge max(2010, cm_startyear))..
+  vm_capCum(ttot+1,regi,teFinTechLearn)
   =e=
-  sum(te2rlf(teLearn,rlf),
-         (pm_ts(ttot) / 2 * vm_deltaCap(ttot,regi,teLearn,rlf)) + (pm_ts(ttot+1) / 2 * vm_deltaCap(ttot+1,regi,teLearn,rlf))
+  sum(te2rlf(teFinTechLearn,rlf),
+         (pm_ts(ttot) / 2 * vm_deltaCap(ttot,regi,teFinTechLearn,rlf)) + (pm_ts(ttot+1) / 2 * vm_deltaCap(ttot+1,regi,teFinTechLearn,rlf))
   )
   +
-  vm_capCum(ttot,regi,teLearn);
+  vm_capCum(ttot,regi,teFinTechLearn);
+
+* qm_deltaCapCumNet(ttot,regi,teLearn)$(ord(ttot) lt card(ttot) AND pm_ttot_val(ttot+1) ge max(2010, cm_startyear))..
+*   vm_capCum(ttot+1,regi,teLearn)
+*   =e=
+*   sum(te2rlf(teLearn,rlf),
+*          (pm_ts(ttot) / 2 * vm_deltaCap(ttot,regi,teLearn,rlf)) + (pm_ts(ttot+1) / 2 * vm_deltaCap(ttot+1,regi,teLearn,rlf))
+*   )
+*   +
+*   vm_capCum(ttot,regi,teLearn);
 
 ***---------------------------------------------------------------------------
 *' Initial values for cumulated capacities (learning technologies only):
 *' (except for tech_stat 4 technologies that have no standing capacities in 2005 and ccap0 refers to another year)
 ***---------------------------------------------------------------------------
+* q_capCumNet(t0,regi,teFinTechLearn)$(NOT (pm_data(regi,"tech_stat",teFinTechLearn) eq 4))..
+*   vm_capCum(t0,regi,teFinTechLearn)
+*   =e=
+*   pm_data(regi,"ccap0",teFinTechLearn)
+*   + sum(ttot$(ttot.val lt t0.val), pm_ts(ttot) * vm_deltaCap(ttot,regi,teFinTechLearn,"1"))$(pm_data(regi,"ccap0",teFinTechLearn) eq 0)
+*   ;
+
 q_capCumNet(t0,regi,teLearn)$(NOT (pm_data(regi,"tech_stat",teLearn) eq 4))..
   vm_capCum(t0,regi,teLearn)
   =e=
-  pm_data(regi,"ccap0",teLearn);
+  pm_data(regi,"ccap0",teLearn)
+  ;
 
 ***---------------------------------------------------------------------------
 *' Additional equation for fuel shadow price calulation:

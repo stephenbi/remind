@@ -15,7 +15,7 @@ vm_emiCO2Sector.l(ttot,all_regi,emi_sectors) = 0;
 *AJS* initialize parameter (avoid compilation errors)
 * do this at the start of datainput to prevent accidental overwriting
 pm_SolNonInfes(regi) = 1; !! assume the starting point came from a feasible solution
-pm_capCum0(ttot,regi,teLearn)$( (ttot.val ge 2005) and  (pm_SolNonInfes(regi) eq 1)) = 0;
+pm_capCum0(ttot,regi,teFinTechLearn)$( (ttot.val ge 2005) and  (pm_SolNonInfes(regi) eq 1)) = 0;
 
 pm_globalMeanTemperature(tall)              = 0;
 pm_globalMeanTemperatureZeroed1900(tall)    = 0;
@@ -1204,12 +1204,67 @@ pm_data(regi,"learnMult_wFC",te)$( pm_data(regi,"tech_stat",te) eq 4 )
    ** pm_data(regi,"learnExp_wFC",te)
     );
 
+* p_capCum(ttot,regi,teFinTechLearn)$(p_capCum(ttot,regi,teFinTechLearn) eq 0) = 1e-6;
+* vm_capCum.l(ttot,regi,teFinTechLearn) = p_capCum(ttot,regi,teFinTechLearn);
 
-
+* vm_capCum.l(ttot,regi,teFinTechLearn)$(p_capCum(ttot,regi,teFinTechLearn) eq 0) = 1e-5;
+* display vm_capCum.l;
 display p_capCum;
 display pm_data;
 
+$ifthen.wacc not %cm_wacc% == "off"
+*SB* 2022-12-06 Initial WACC implementation
+*** Differentiated WACC across regions and technologies in initial period
+table f_tewacc0(all_regi,all_te)
+$ondelim
+$include "./core/input/f_tewacc0.cs3r"
+$offdelim
+;
+
+parameter f_natwacc0(all_regi)
+/
+$ondelim
+$include "./core/input/f_natwacc0.cs4r"
+$offdelim
+/
+;
+
+*** Initialize parameters to observed data
+p_tewacc0(regi,teWACClearn) = f_tewacc0(regi,teWACClearn);
+
+p_countryrisk("2020",regi) = f_natwacc0(regi);
+
+*** Assume exogenous convergence of regional risk markups to USA level by 2070 (very optimistic; will change to SSP-dependent paths)
+loop(ttot$(ttot.val ge 2005 AND ttot.val le 2070 ),
+    p_countryrisk(ttot,regi)
+    = (pm_ttot_val(ttot) - 2005) / 65 * p_countryrisk("2020","USA")
+    + (2070 - pm_ttot_val(ttot)) / 65 * p_countryrisk("2020",regi);
+  );
+
+p_countryrisk(ttot,regi)$( ttot.val lt 2020 ) = p_countryrisk("2020",regi);
+p_countryrisk(ttot,regi)$( ttot.val ge 2070 ) = p_countryrisk("2020","USA");
+
+*** Initialize technology risk markup in all periods to initial period
+vm_teWACC.l(ttot,regi,teWACClearn) = p_tewacc0(regi,teWACClearn);
+
+*** Financial experience rate (percentage decrease in WACC per doubling of cumulative capacity)
+*** Will become switch enabling either global or regionalized experience rates (or exogenous WACC trajectories)  
+p_tewaccexprate(regi,teWACClearn) = 0.05;
+
+*** Exponential WACC learning rate along financial experience cost curve with floor set to natural gas plants in the US
+* p_wacc_learn(regi,teWACClearn) = (p_tewacc0(regi,teWACClearn) / p_tewacc0("USA","ngt"))$(p_tewacc0("USA","ngt") gt 0) * (log(1-p_tewaccexprate(regi,teWACClearn)) / log(2));
+
+*** Exponential WACC learning rate along financial experience cost curve without floor
+p_wacc_learn(regi,teWACClearn) = (log(1-p_tewaccexprate(regi,teWACClearn)) / log(2));
+
+*** Amortization period (in years) of capital finance
+*** May become region/tech-specific 
+p_wacc_amort(regi,teWACClearn) = 20; !!Currently not used due to implementation difficulty (instead we assume amortization over technical lifetime)
+
+display p_wacc_learn, p_tewacc0, p_tewaccexprate, p_countryrisk, pm_capCum0;
+$endif.wacc
 *** end learning parameters
+
 
 *RP* 2012-03-07: Markup for advanced technologies
 table p_costMarkupAdvTech(s_statusTe,tall)              "Multiplicative investment cost markup for early time periods (until 2030) on advanced technologies (CCS, Hydrogen) that are not modeled through endogenous learning"

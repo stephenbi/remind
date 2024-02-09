@@ -1571,6 +1571,12 @@ $setglobal c_CES_calibration_industry_FE_target  1
 $setglobal c_testOneRegi_region  EUR       !! def = EUR
 $setglobal cm_fixCO2price  off !! def = off
 
+$setglobal  cm_wacc  on      !! def = "on"            
+*** switch to enable weighted average cost of capital (WACC) markups on technologies and/or countries
+*** (off)     default, no WACC markups on any technologies or regions
+*** (on)      WACC markups on technologies with endogenous financial learning curve; and on regional risk with exogenous linear convergence of financial experience
+*** (further options and switches to come) 
+
 *' @stop
 
 *-------------------------------------------------------------------------------------

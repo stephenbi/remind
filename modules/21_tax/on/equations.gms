@@ -58,6 +58,7 @@ $endIf.cm_implicitPriceTarget
 $ifthen.cm_implicitPePriceTarget not "%cm_implicitPePriceTarget%" == "off"
     + sum(entyPe,vm_taxrevimplicitPePriceTax(t,regi,entyPe))
 $endIf.cm_implicitPePriceTarget
+    + sum(te$(teWACClearn(te)), vm_costWACC(t,regi,te)$(p_tewacc0(regi,te) or p_countryrisk(t,regi)) )    !! revenues from cost of capital to domestic investors
  ;
 
 ***---------------------------------------------------------------------------

@@ -222,6 +222,13 @@ pm_share_CCS_CCO2(ttot,all_regi)                      "share of stored CO2 from 
 
 pm_delta_histCap(tall,all_regi,all_te)                "parameter to store data of historic capacity additions [TW/yr]"
 
+p_countryrisk(ttot,all_regi)                          "dynamic weighted average cost of capital (WACC), differentiated by region and technology"
+p_tewacc0(all_regi,all_te)                            "WACC for each technology in each region at t0"
+p_finexp(all_regi,all_te)                             "financial experience rate - percentage by which WACC decreases for each doubling of cumulative capacity, to be regionalized"
+p_wacc_learn(all_regi,all_te)                         "exponent by which WACC decreases with cumulative capacity"
+p_wacc_amort(all_regi,all_te)                         "Amortization period of finance, likely to be regionalized"
+p_cap0(all_regi,all_te)
+
 * Energy carrier Prices
 pm_FEPrice(ttot,all_regi,all_enty,sector,emiMkt)      "parameter to capture all FE prices across sectors and markets (tr$2005/TWa)"
 pm_FEPrice_iter(iteration,ttot,all_regi,all_enty,sector,emiMkt) "parameter to capture all FE prices across sectors and markets (tr$2005/TWa) across iterations"
@@ -347,6 +354,8 @@ vm_costCESMkup(ttot,all_regi,all_in)                  "CES markup cost to repres
 vm_taxrevimplicitQttyTargetTax(ttot,all_regi)        "quantity target bound implemented through implict tax"
 vm_taxrevimplicitPriceTax(ttot,all_regi,entySe,all_enty,sector)   "final energy price target implemented through implict tax"
 vm_taxrevimplicitPePriceTax(ttot,all_regi,all_enty)  "primary energy price target implemented through implict tax"
+vm_teWACC(ttot,all_regi,all_te)                    "technology- and region-specific weighted average cost of capital (WACC)"
+vm_costWACC(ttot,all_regi,all_te)                  "additional investment costs induced by WACC"
 ;
 
 ***----------------------------------------------------------------------------------------
@@ -522,6 +531,9 @@ q_shbiofe_lo(ttot,all_regi,all_enty,emi_sectors,all_emiMkt) "share of biomass pe
 q_capH2BI(ttot,all_regi)                                  "H2 infrastructure capacities of buildings and industry need to add up to the total infrastructure of the stationary sector"
 q_limitCapFeH2BI(ttot,all_regi,emi_sectors)               "capacity limit equation for H2 infrastructure capacities of buildings and industry"
 
+q_teWACC(ttot,all_regi,all_te)
+q_teWACC0(ttot,all_regi,all_te)
+q_costWACC(ttot,all_regi,all_te)
 
 $IFTHEN.sehe_upper not "%cm_sehe_upper%" == "off"
 q_heat_limit(ttot,all_regi)  "equation to limit maximum level of secondary energy district heating and heat pumps use"

@@ -6,6 +6,9 @@
 *** |  Contact: remind@pik-potsdam.de
 *** SOF ./core/postsolve.gms
 
+*** WACC variables
+display vm_costWACC.l, vm_teWACC.l, v_costInvTeDir.l, v_costInvTeAdj.l;
+
 *-------------------------------calculate regional permit prices-----------------------------------
 *** saving CO2 tax used in this iteration
 p_taxCO2eq_iteration(iteration,ttot,regi) = pm_taxCO2eq(ttot,regi);

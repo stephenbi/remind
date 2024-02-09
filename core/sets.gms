@@ -1315,6 +1315,33 @@ $ENDIF.WindOff
 
 teNoLearn(all_te)   "Technologies without learning effect"
 
+teWACClearn(all_te)
+/
+        wind        "wind onshore power converters"
+$IFTHEN.WindOff %cm_wind_offshore% == "1"
+	      windoff     "wind offshore power converters"
+$ENDIF.WindOff
+        spv         "solar photovoltaic"
+        biochp      "biomass combined heat and power"
+        bioigcc     "integrated biomass gasification combined cycle"
+        bioigccc    "integrated biomass gasification combined cycle with CCS"
+        hydro
+        tnrs
+        pc
+        pcc
+        pco
+        igcc
+        igccc
+        coalchp
+        ngt
+        ngcc
+        ngccc
+        gaschp  
+        csp      
+/
+
+teFinTechLearn(all_te)    "Technologies with either financial or technological learning curves"
+
 teEtaIncr(all_te)       "Technologies with time variable efficiency parameter eta"
 *RP* computationally the explicit build-time tracking for teEtaIncr is expensive. Therefore, I removed the heating plants, because there the efficiency is anyway high and doesn't have such a large influence
 /

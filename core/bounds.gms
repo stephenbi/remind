@@ -250,7 +250,7 @@ loop(te$(sameas(te,"csp")),
 
 $IFTHEN.WindOff %cm_wind_offshore% == "0"
 loop(te$(sameas(te,"spv") OR sameas(te,"wind") ),
-  vm_cap.lo("2015",regi,te,"1") = 0.95 * pm_histCap("2015",regi,te)$(pm_histCap("2015",regi,te) gt 1e-10);
+  vm_cap.lo("2015",regi,te,"1") = 0.9 * pm_histCap("2015",regi,te)$(pm_histCap("2015",regi,te) gt 1e-10);
   vm_cap.up("2015",regi,te,"1") = 1.05 * pm_histCap("2015",regi,te)$(pm_histCap("2015",regi,te) gt 1e-10);
   vm_cap.lo("2020",regi,te,"1") = 0.95 * pm_histCap("2020",regi,te)$(pm_histCap("2020",regi,te) gt 1e-10);
   vm_cap.up("2020",regi,te,"1") = 1.05 * pm_histCap("2020",regi,te)$(pm_histCap("2020",regi,te) gt 1e-10);
@@ -261,7 +261,7 @@ $ENDIF.WindOff
 
 $IFTHEN.WindOff %cm_wind_offshore% == "1"
 loop(te$(sameas(te,"spv") OR sameas(te,"wind") OR sameas(te,"windoff")),
-  vm_cap.lo("2015",regi,te,"1") = 0.95 * pm_histCap("2015",regi,te)$(pm_histCap("2015",regi,te) gt 1e-10);
+  vm_cap.lo("2015",regi,te,"1") = 0.9 * pm_histCap("2015",regi,te)$(pm_histCap("2015",regi,te) gt 1e-10);
   vm_cap.up("2015",regi,te,"1") = 1.05 * pm_histCap("2015",regi,te)$(pm_histCap("2015",regi,te) gt 1e-10);
   vm_cap.lo("2020",regi,te,"1") = 0.95 * pm_histCap("2020",regi,te)$(pm_histCap("2020",regi,te) gt 1e-10);
   vm_cap.up("2020",regi,te,"1") = 1.05 * pm_histCap("2020",regi,te)$(pm_histCap("2020",regi,te) gt 1e-10);
@@ -310,6 +310,8 @@ vm_capCum.fx(t0,regi,teLearn)$(pm_data(regi,"tech_stat",teLearn) eq 4) = 0;
 *** tech_stat 4 technologies don't learn before 2025, so capital cost should be fixed
 vm_costTeCapital.fx(t,regi,teLearn)$(t.val le 2020 AND pm_data(regi,"tech_stat",teLearn) eq 4)=fm_dataglob("inco0",teLearn);
 
+* vm_capCum.l(ttot,regi,teWACClearn) = p_capCum(ttot,regi,teWACClearn);  !! WACC calculation needs some capacity for all techs
+vm_capCum.lo(ttot,regi,teWACClearn) = 1e-6;
 
 *CB 2012024 -----------------------------------------------------
 *CB allow for early retirement at the start of free model time
