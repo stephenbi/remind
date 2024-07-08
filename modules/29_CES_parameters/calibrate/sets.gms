@@ -1,4 +1,4 @@
-*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2024 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -89,6 +89,11 @@ eff_scale_par   "parameters for scaling certain efficiencies during calibration"
   CES_tp(all_in)   "CES tree traversal pending nodes"
   CES_ts(all_in)   "CES tree traversal swap node"
   /   /
+
+  in_limit_price_change_29(all_in)   "production factors that have their price changes limited to a factor of two during calibration"
+  /
+    %cm_in_limit_price_change%
+  /
 ;
 
 alias(cesOut2cesIn_below,cesOut2cesIn_below2);

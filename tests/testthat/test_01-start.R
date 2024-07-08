@@ -1,4 +1,4 @@
-# |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
+# |  (C) 2006-2024 Potsdam Institute for Climate Impact Research (PIK)
 # |  authors, and contributors see CITATION.cff file. This file is part
 # |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 # |  AGPL-3.0, you are granted additional permissions described in the
@@ -39,10 +39,6 @@ test_that("start.R --test succeeds on all configs", {
                            file.path("../../config", "*", "scenario_config*.csv")))
   }
   csvfiles <- normalizePath(grep("scenario_config_coupled", csvfiles, invert = TRUE, value = TRUE))
-  skipfiles <- c("scenario_config_21_EU11_ECEMF",
-                 "scenario_config_EDGE-T_NDC_NPi_pkbudget",
-                 "scenario_config_NAVIGATE_300")
-  csvfiles <- grep(paste(skipfiles, collapse = "|"), csvfiles, invert = TRUE, value = TRUE)
   expect_true(length(csvfiles) > 0)
   testthat::with_mocked_bindings(
     for (csvfile in csvfiles) {

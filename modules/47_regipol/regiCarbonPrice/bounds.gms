@@ -1,4 +1,4 @@
-*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2024 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -17,10 +17,6 @@
 *' ##### Bounds for Germany
 *'
 *' ###### Bounds for Historic and Near-term Alignment
-
-*' These bounds account for historic nuclear power development.
-vm_cap.fx("2015",regi,"tnrs","1")$((cm_startyear le 2015) and (sameas(regi,"DEU"))) = 10.8/1000; 
-vm_cap.fx("2020",regi,"tnrs","1")$((cm_startyear le 2020) and (sameas(regi,"DEU"))) = 7.8/1000;
 
 *' This limits wind and solar PV capacity additions for 2025 in light of recent slow developments as of 2023.
 *' Upper bound is double the historic maximum capacity addition in 2011-2020.
@@ -52,10 +48,6 @@ vm_capEarlyReti.up('2025',regi,'pc') = 0.65;
 *' Rough calculation with REMIND parameters:
 *' 5 GW * 8760 (hours per year) * 0.5 (capacity factor) / 0.4 (conversion efficiency) * 1e-3 * 0.35 MtCO2/TWh (emissions factor coal) ~ 20 Mt CO2/yr.
 vm_capTotal.lo("2030",regi,"pecoal","seel")$(sameas(regi,"DEU"))=5/1000;
-
-
-*' This limits CO2 underground injection up to 2030 in line with recent developments as of 2023. 
-vm_co2CCS.up(t,regi,"cco2","ico2",te,rlf)$((t.val le 2030) AND (sameas(regi,"DEU"))) = 1e-3;
 
 *' ###### Bounds for Germany-specific Policies (activated by switches)
 
@@ -166,9 +158,13 @@ $endIf.cm_VREminShare
 *' It is used, for example, to hit specific, steel and cement production trajectories in policy scenarios
 *' for project-specific scenarios. It is not necessarily a policy but a different (exogenuous) assumption 
 *' about future production trajectories than what REMIND produces endogenuously. 
-$ifthen.ExogDemScen NOT "%cm_exogDem_scen%" == "off"
+$ifthen.exogDemScen NOT "%cm_exogDem_scen%" == "off"
 vm_cesIO.fx(t,regi,in)$(pm_exogDemScen(t,regi,"%cm_exogDem_scen%",in))=pm_exogDemScen(t,regi,"%cm_exogDem_scen%",in);
-$endif.ExogDemScen
+$endif.exogDemScen
+
+*' This bound avoids hydrogen production from gas in the European region (unlikely to happen after recent gas trade changes)
+vm_deltaCap.up(t,regi,"gasftrec",rlf)$((t.val gt 2005) and (regi_group("EUR_regi",regi))) = 0;
+vm_deltaCap.up(t,regi,"gasftcrec",rlf)$((t.val gt 2005) and (regi_group("EUR_regi",regi))) = 0;
 
 *' @stop
 

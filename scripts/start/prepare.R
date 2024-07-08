@@ -1,4 +1,4 @@
-# |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
+# |  (C) 2006-2024 Potsdam Institute for Climate Impact Research (PIK)
 # |  authors, and contributors see CITATION.cff file. This file is part
 # |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 # |  AGPL-3.0, you are granted additional permissions described in the
@@ -335,7 +335,7 @@ prepare <- function() {
 
     writeLines(levs, "levs.gms")
 
-    # Replace fixing.gms with level values
+    # Replace fixings.gms with level values
     file.copy("levs.gms", "fixings.gms", overwrite = TRUE)
 
     fixings_manipulateThis <- c(fixings_manipulateThis, list(c(".L ", ".FX ")))

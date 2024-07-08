@@ -1,4 +1,4 @@
-*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2024 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -73,6 +73,11 @@ $include "./modules/30_biomass/magpie_40/input/f30_bioen_price.cs4r"
 $offdelim
 /
 ;
+
+
+if (cm_startyear gt 2005,
+execute_load "input_ref.gdx", p30_pebiolc_costs_emu_preloop;
+);
 
 *** Select bioenergy bioenergy supply curve according to SSP scenario
 i30_bioen_price_a(ttot,regi) = f30_bioen_price(ttot,regi,"%cm_LU_emi_scen%","%cm_rcp_scen%","a");

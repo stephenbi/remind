@@ -1,4 +1,4 @@
-*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2024 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -18,10 +18,7 @@ Parameters
   p29_cesdata_load(tall,all_regi,all_in,cesParameter)  "pm_cesdata from the gdx file"
   p29_cesIO_load(tall,all_regi,all_in)                "production factor vm_cesIO from input.gdx"
   p29_effGr(tall,all_regi,all_in)                                   "growth of factor efficiency from input.gdx"
-$ifthen.transpmodule "%transport%" == "edge_esm"
   p29_trpdemand(tall,all_regi,all_GDPscen,all_demScen,EDGE_scenario_all,all_in) "transport demand for the edge_esm transport module, unit: trillion passenger/ton km"
-$endif.transpmodule
-  p29_esdemand(tall,all_regi,all_in)                  "energy service demand"
   p29_efficiency_growth(tall,all_regi,all_in)         "efficency level paths for ppf beyond calibration"
   p29_capitalQuantity(tall,all_regi,all_in)            "capital quantities"
   p29_capitalPrice(tall,all_regi)                "capital prices"
@@ -53,6 +50,17 @@ file_CES_calibration.nd =     3;   !! three decimal places
 file_CES_calibration.nw =    10;   !! number width: +0.000e+00
 file_CES_calibration.pw = 32767;   !! page width
 
+$macro file_CES_calibration_integers \
+  file_CES_calibration.nd = 0; \
+  file_CES_calibration.nr = 1; \
+  file_CES_calibration.nw = 0;
+
+$macro file_CES_calibration_floats \
+  file_CES_calibration.nd =  3; \
+  file_CES_calibration.nr =  2; \
+  file_CES_calibration.nw = 10;
+
+
 if (sm_CES_calibration_iteration eq 1,
   !! print a comment header giving the order of production factors in the CES
   !! tree so that they can be displayed in a meaningful order in calibration
@@ -74,9 +82,9 @@ if (sm_CES_calibration_iteration eq 1,
     !! are pending (so it has not been processed before)
     if (sum(CES_tc$(    (   ppf(CES_tc)
                          OR industry_ue_calibration_target_dyn37(CES_tc))
-		    AND (   sum(cesOut2cesIn(CES_tc,in), 1)
-		         eq sum(cesOut2cesIn(CES_tc,CES_tp), 1))
-		   ), 1),
+                    AND (   sum(cesOut2cesIn(CES_tc,in), 1)
+                         eq sum(cesOut2cesIn(CES_tc,CES_tp), 1))
+                   ), 1),
     !! add the current node to the list
     loop (CES_tc, put ", ", CES_tc.tl:0);
   );

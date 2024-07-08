@@ -1,4 +1,4 @@
-*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2024 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -127,8 +127,8 @@ loop (fe2ppfEn(entyFe,ppfEn),
 display "production function sets", cesOut2cesIn, cesOut2cesIn2, cesLevel2cesIO, cesRev2cesIO, ppf, ppfEn, ipf;
 
 *** Energy service layer sets
-loop(es2ppfen(esty,ppfen),
-    ppfenFromEs(ppfen) = yes;
+loop(es2ppfen(esty,ppfEn),
+    ppfenFromEs(ppfEn) = yes;
 );
 
 loop (fe2es(entyFe,esty,teEs),
@@ -136,8 +136,8 @@ loop (fe2es(entyFe,esty,teEs),
 );
 
 loop (fe2es(entyFe,esty,teEs),
-    loop(es2ppfen(esty,ppfen),
-	feViaEs2ppfen(entyFe,ppfen,teEs) = YES;
+    loop(es2ppfen(esty,ppfEn),
+	feViaEs2ppfen(entyFe,ppfEn,teEs) = YES;
 	);
 );
 

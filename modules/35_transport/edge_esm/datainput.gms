@@ -1,4 +1,4 @@
-*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2024 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -54,10 +54,10 @@ p35_shFeCes(ttot,regi,"%cm_GDPscen%","%cm_demScen%","%cm_EDGEtr_scen%",entyFe,pp
 
 
 *** set starting points
-pm_esCapCost(ttot,regi,teEs_dyn35) = p35_esCapCost(ttot,regi,"%cm_GDPScen%","%cm_demScen%","%cm_EDGEtr_scen%",teEs_dyn35);
-pm_fe2es(ttot,regi,teEs_dyn35) = p35_fe2es(ttot,regi,"%cm_GDPScen%","%cm_demScen%","%cm_EDGEtr_scen%",teEs_dyn35);
+pm_esCapCost(ttot,regi,teEs_dyn35) = p35_esCapCost(ttot,regi,"%cm_GDPscen%","%cm_demScen%","%cm_EDGEtr_scen%",teEs_dyn35);
+pm_fe2es(ttot,regi,teEs_dyn35) = p35_fe2es(ttot,regi,"%cm_GDPscen%","%cm_demScen%","%cm_EDGEtr_scen%",teEs_dyn35);
 
-pm_shFeCes(ttot,regi,entyFe,ppfen_dyn35,teEs_dyn35)$fe2ces_dyn35(entyFe,ppfen_dyn35,teEs_dyn35) = p35_shFeCes(ttot,regi,"%cm_GDPScen%","%cm_demScen%","%cm_EDGEtr_scen%",entyFe,ppfen_dyn35,teEs_dyn35);
+pm_shFeCes(ttot,regi,entyFe,ppfen_dyn35,teEs_dyn35)$fe2ces_dyn35(entyFe,ppfen_dyn35,teEs_dyn35) = p35_shFeCes(ttot,regi,"%cm_GDPscen%","%cm_demScen%","%cm_EDGEtr_scen%",entyFe,ppfen_dyn35,teEs_dyn35);
 
 *** workaround for nat. gas for transport -> should go to mrremind at some point
 pm_cf(ttot,regi,"tdfosgat") = 0.65;

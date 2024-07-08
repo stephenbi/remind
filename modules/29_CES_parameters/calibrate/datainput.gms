@@ -1,4 +1,4 @@
-*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2024 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -65,10 +65,10 @@ loop (ue_29(ppf_29(out)),
 
   loop (cesOut2cesIn(out,in),
     if (ppfKap(in), sm_tmp  = sm_tmp  + 1);
-    if (ppfen(in),  sm_tmp2 = sm_tmp2 + 1);
+    if (ppfEn(in),  sm_tmp2 = sm_tmp2 + 1);
   );
 
-  !! in case one input is ppfen/FE and the other Kap
+  !! in case one input is ppfEn/FE and the other Kap
   if (sm_tmp eq 1 AND sm_tmp2 eq 1,
     ue_fe_kap_29(out) = YES;
   else
@@ -144,34 +144,12 @@ ipf_beyond_last(out) = YES;
 *** End of Sets calculation
 
 Parameter
-f29_esdemand(tall,all_regi,all_demScen,all_in)       "energy service demand"
-/
-$ondelim
-$include "./modules/29_CES_parameters/calibrate/input/f29_esdemand.cs4r"
-$offdelim
-/
-;
-*** change million m2.C to trillion m2.C
-p29_esdemand(t,regi,in) = f29_esdemand(t,regi,"%cm_demScen%",in)/sm_mega_2_non;
-
-Parameter
-$ifthen.transpmodule "%transport%" == "edge_esm"
 p29_trpdemand       "transport demand"
 /
 $ondelim
 $include "./modules/29_CES_parameters/calibrate/input/pm_trp_demand.cs4r"
 $offdelim
 /
-$endif.transpmodule
-
-f29_efficiency_growth(tall,all_regi,all_demScen,all_in)       "efficency growth for ppf beyond calibration"
-/
-$ondelim
-$include "./modules/29_CES_parameters/calibrate/input/f29_efficiency_growth.cs4r"
-$offdelim
-/
-;
-p29_efficiency_growth(t,regi,in) = f29_efficiency_growth(t,regi,"%cm_demScen%",in);
 
 parameter
 f29_capitalQuantity(tall,all_regi,all_demScen,all_in)          "capital quantities"
@@ -237,8 +215,7 @@ p29_cesdata_load(t,regi,in,"rho")$( p29_cesdata_load(t,regi,in,"rho") eq 0) = 0.
 *** Load quantities and efficiency growth from the last run
 Execute_Loadpoint 'input'  p29_cesIO_load = vm_cesIO.l, p29_effGr = vm_effGr.l;
 
-*** DEBUG: Load vm_deltacap
-Execute_Loadpoint 'input' vm_deltacap;
+Execute_Loadpoint 'input' vm_deltaCap;
 
 *** Load exogenous Labour, GDP
 pm_cesdata(t,regi,"inco","quantity") = pm_gdp(t,regi);
@@ -254,9 +231,6 @@ $ifthen.industry_subsectors "%industry%" == "subsectors"
 $else.industry_subsectors
   sm_EJ_2_TWa * pm_fedemand(t,regi,in)
 $endif.industry_subsectors
-
-*** Load exogenous ES trajectories
-pm_cesdata(t,regi,in,"quantity") $p29_esdemand(t,regi,in) = p29_esdemand(t,regi,in);
 
 *** Load exogenous transport demand - required for the EDGE transport module
 $ifthen.edgesm %transport% ==  "edge_esm"
@@ -347,7 +321,7 @@ $endif.build_H2_offset
 loop((t,regi,in)$(    (ppf(in) OR ppf_29(in))
                   AND pm_cesdata(t,regi,in,"quantity") lt 1e-5
                   AND NOT ppfen_industry_dyn37(in)
-                  AND NOT ppfkap_industry_dyn37(in)
+                  AND NOT ppfKap_industry_dyn37(in)
                   AND NOT SAMEAS(in,"feh2i")
                   AND NOT SAMEAS(in,"feh2b")        ),
   pm_cesdata(t,regi,in,"offset_quantity")  = pm_cesdata(t,regi,in,"quantity")  - 1e-5;
@@ -359,14 +333,6 @@ p29_capitalPrice(t,regi) = 0.12;
 
 *** Load capital price assumption for the first iteration, otherwise take it from gdx prices
 if( sm_CES_calibration_iteration eq 1 AND s29_CES_calibration_new_structure eq 1,  pm_cesdata(t,regi,"kap","price") = p29_capitalPrice(t,regi));
-
-*** In case there is one capital variable together with an energy variable in a same CES, give them the same efficiency growth pathways
-
-loop (ue_fe_kap_29(out),
-        loop ((cesOut2cesIn(out,in),cesOut2cesIn2(out,in2))$(ppfKap(in) AND ppfen(in2)),
-        p29_efficiency_growth(t,regi,in) = p29_efficiency_growth(t,regi,in2);
-        );
-    );
 
 p29_esubGrowth = 0.3;
 

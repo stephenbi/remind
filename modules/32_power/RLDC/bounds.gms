@@ -1,4 +1,4 @@
-*** |  (C) 2006-2023 Potsdam Institute for Climate Impact Research (PIK)
+*** |  (C) 2006-2024 Potsdam Institute for Climate Impact Research (PIK)
 *** |  authors, and contributors see CITATION.cff file. This file is part
 *** |  of REMIND and licensed under AGPL-3.0-or-later. Under Section 7 of
 *** |  AGPL-3.0, you are granted additional permissions described in the
@@ -55,10 +55,12 @@ loop(regi,
 
 *Avoiding infeasibilities from upper limit on CCS deployment in 2020
 loop(regi,
-	if( (pm_boundCapCCS(regi) eq 0),
-		vm_capFac.fx("2020",regi,teCCS)      = 0;
-        v32_capLoB.fx("2020",regi,teCCS,LoB)    = 0;
-        v32_capER.fx("2020",regi,teCCS)         = 0;
+  loop(t$(t.val le 2030),
+    if( ( pm_boundCapCCS(t,regi,"up") eq 0),
+      vm_capFac.fx(t,regi,teCCS)      = 0;
+          v32_capLoB.fx(t,regi,teCCS,LoB)    = 0;
+          v32_capER.fx(t,regi,teCCS)         = 0;
+      );
     );
 );
 
